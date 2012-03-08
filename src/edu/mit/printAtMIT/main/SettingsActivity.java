@@ -70,7 +70,6 @@ public class SettingsActivity extends ListActivity {
         Button btn = (Button) findViewById(R.id.print_button);
         btn.setOnClickListener(new View.OnClickListener() {
 			
-			@Override
 			public void onClick(View v) {
 				String intStorageDirectory = getFilesDir().toString();
     	        File f = new File(intStorageDirectory, "printAtMIT_testPage.pdf");

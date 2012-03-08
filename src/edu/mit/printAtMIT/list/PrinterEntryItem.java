@@ -25,17 +25,14 @@ public class PrinterEntryItem implements Item {
         this.status = status;
         
     }
-    @Override
     public boolean isSection() {
         return false;
     }
 
-    @Override
     public boolean isButton() {
         return false;
     }
     
-    @Override
     public boolean isPrinterEntry() {
         // TODO Auto-generated method stub
         return true;

@@ -19,7 +19,6 @@ public class ButtonItem implements Item{
 		return true;
 	}
 
-    @Override
     public boolean isPrinterEntry() {
         // TODO Auto-generated method stub
         return false;

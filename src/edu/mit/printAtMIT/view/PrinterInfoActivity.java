@@ -97,7 +97,6 @@ public class PrinterInfoActivity extends ListActivity {
         });
         button02.setOnClickListener(new View.OnClickListener() {
 
-            @Override
             public void onClick(View v) {
                 Log.i(TAG, "clicking favorite button");
                 if (favorite) {
