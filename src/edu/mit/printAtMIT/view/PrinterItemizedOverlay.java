@@ -85,7 +85,7 @@ public class PrinterItemizedOverlay extends ItemizedOverlay<PrinterOverlayItem> 
         clickableRegion = balloonView.findViewById(R.id.balloon_inner_layout);
 
         clickableRegion.setOnTouchListener(new OnTouchListener() {
-            @Override
+            //@Override
             public boolean onTouch(View v, MotionEvent event) {
                 View l = ((View) v.getParent())
                         .findViewById(R.id.balloon_main_layout);

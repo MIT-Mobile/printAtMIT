@@ -66,7 +66,7 @@ public class PrinterListActivity extends ListActivity {
     // Comparator to sort printers alphabetically
     public class PrinterComparator implements Comparator<PrinterEntryItem> {
 
-        @Override
+        //@Override
         public int compare(PrinterEntryItem item1, PrinterEntryItem item2) {
             return item1.printerName.compareTo(item2.printerName);
         }
