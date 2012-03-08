@@ -21,7 +21,6 @@ public class EntryItem implements Item{
 		return false;
 	}
 
-
     public boolean isPrinterEntry() {
         // TODO Auto-generated method stub
         return false;

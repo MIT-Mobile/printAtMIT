@@ -69,7 +69,7 @@ public class SettingsActivity extends ListActivity {
         setContentView(R.layout.setting_layout);
         Button btn = (Button) findViewById(R.id.print_button);
         btn.setOnClickListener(new View.OnClickListener() {
-			
+
 		//	@Override
 			public void onClick(View v) {
 				String intStorageDirectory = getFilesDir().toString();

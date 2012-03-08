@@ -3,7 +3,17 @@
                 android:layout_width="fill_parent" 
                 android:layout_height="fill_parent"
                 android:padding="10dp" 
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@color/background">
+
+    <ImageView 
+	   android:id="@+id/logo"
+	   android:src="@drawable/blurb"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:layout_centerHorizontal="true"
+	   android:paddingBottom="20dp"
+	   />
 
     
      <EditText android:id="@+id/entry" 
@@ -15,22 +25,8 @@
               android:imeOptions="actionDone"
                />
     
-   	<TextView android:id="@+id/label" 
-              android:layout_width="wrap_content" 
-              android:layout_height="wrap_content" 
-              android:layout_centerHorizontal="true"
-              android:paddingBottom="15dp"
-              android:text="Enter your Kerberos ID"
-              android:layout_above="@id/entry" />
-    <ImageView 
-	   android:id="@+id/logo"
-	   android:src="@drawable/logo"
-	   android:layout_width="wrap_content"
-	   android:layout_height="wrap_content"
-	   android:layout_centerHorizontal="true"
-	   android:layout_above="@id/label"
-	   android:paddingBottom="20dp"
-	   />
+   	
+    
    	<Button android:id="@+id/continue_button"
 			android:text="Continue" 
 			android:layout_width="200dp" 

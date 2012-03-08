@@ -20,6 +20,7 @@ public class SectionItem implements Item{
 		return false;
 	}
 
+
    // @Override
     public boolean isPrinterEntry() {
         return false;

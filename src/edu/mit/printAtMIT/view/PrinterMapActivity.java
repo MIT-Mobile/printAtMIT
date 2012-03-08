@@ -213,7 +213,6 @@ public class PrinterMapActivity extends MapActivity {
 
         Collections.sort(objects, new Comparator<ParseObject>() {
 
-
             public int compare(ParseObject obj1, ParseObject obj2) {
                 return Integer.parseInt(obj1.getString("status"))
                         - Integer.parseInt(obj2.getString("status"));
