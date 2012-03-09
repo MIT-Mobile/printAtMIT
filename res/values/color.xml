@@ -6,4 +6,5 @@
     <color name="transparent">#00000000 </color>
     <color name="button_blue">#2489ea</color>
     <color name = "background">#e9e2e2</color>
+    <color name = "red">#cb1212</color>
 </resources>
