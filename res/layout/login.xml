@@ -6,32 +6,43 @@
                 android:orientation="vertical"
                 android:background="@color/background">
 
+    <View android:id="@+id/helper1" 
+			android:layout_width="0dp"
+			android:layout_height="0dp" 
+			android:layout_centerHorizontal="true" 
+			android:layout_centerVertical="true"
+	/>
+    
     <ImageView 
-	   android:id="@+id/logo"
+	   android:id="@+id/logo_blurb"
 	   android:src="@drawable/blurb"
 	   android:layout_width="wrap_content"
 	   android:layout_height="wrap_content"
 	   android:layout_centerHorizontal="true"
-	   android:paddingBottom="20dp"
+	   android:layout_above="@id/helper1"  
+	   android:paddingRight="5dp"
 	   />
 
+    <Button android:id="@+id/continue_button"
+   	        android:background="@color/transparent"
+			android:layout_width="wrap_content" 
+			android:drawableTop="@drawable/login_button"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/helper1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp" />
     
      <EditText android:id="@+id/entry" 
-              android:layout_width="fill_parent" 
+              android:layout_width="200dp" 
               android:layout_height="wrap_content" 
+              android:layout_below="@id/continue_button"
               android:background="@android:drawable/editbox_background"
-              android:layout_centerVertical="true"
+              android:layout_centerHorizontal="true"
               android:inputType="text"
               android:imeOptions="actionDone"
                />
     
    	
     
-   	<Button android:id="@+id/continue_button"
-			android:text="Continue" 
-			android:layout_width="200dp" 
-            android:layout_height="wrap_content"
-            android:layout_below="@id/entry"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp" />
+   	
 </RelativeLayout>
