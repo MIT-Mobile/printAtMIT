@@ -2,9 +2,9 @@ package edu.mit.printAtMIT;
 
 import com.parse.Parse;
 
-import edu.mit.printAtMIT.main.SettingsActivity;
-import edu.mit.printAtMIT.print.PrintMenuActivity;
-import edu.mit.printAtMIT.view.PrintListMenuActivity;
+import edu.mit.printAtMIT.view.listPrinter.PrintListMenuActivity;
+import edu.mit.printAtMIT.view.main.SettingsActivity;
+import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.SharedPreferences;
