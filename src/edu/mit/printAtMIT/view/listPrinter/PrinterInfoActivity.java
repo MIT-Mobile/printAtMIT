@@ -10,6 +10,7 @@ import com.parse.ParseQuery;
 
 import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;

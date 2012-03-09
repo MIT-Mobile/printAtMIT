@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Comparator;
 import java.util.Map;
 
 import android.app.Dialog;
@@ -36,6 +35,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.controller.client.PrinterClient;
+import edu.mit.printAtMIT.model.printer.ListType;
 import edu.mit.printAtMIT.model.printer.PrinterComparator;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
@@ -57,23 +58,9 @@ public class PrinterListActivity extends ListActivity {
     public static final String TAG = "PrinterListActivity";
     private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
     private static final int REFRESH_ID = Menu.FIRST;
-    
-    private Map<String, PrinterEntryItem> curr_map = new HashMap<String, PrinterEntryItem>();
-    private Map<String, PrinterEntryItem> all_map = new HashMap<String, PrinterEntryItem>();
-    private PrintersDbAdapter mDbAdapter;
-    private PrinterComparator comparator = new PrinterComparator();
+
     private final Context self = PrinterListActivity.this;
 
-//    // Comparator to sort printers alphabetically
-//    public class PrinterComparator implements Comparator<PrinterEntryItem> {
-//
-//
-//        //@Override
-//        public int compare(PrinterEntryItem item1, PrinterEntryItem item2) {
-//            return item1.printerName.compareTo(item2.printerName);
-//        }
-//
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,8 +82,7 @@ public class PrinterListActivity extends ListActivity {
         	
         	setTitle(type + " Printers");
         }
-        mDbAdapter = new PrintersDbAdapter(this);
-        
+
         RefreshListTask task = new RefreshListTask();
         task.execute(isConnected(self));
     }
@@ -167,87 +153,25 @@ public class PrinterListActivity extends ListActivity {
      * Sets Views Should be called in UI thread
      */
     private void setListViewData(List<ParseObject> objects) {
+    	/***********temporary code until new look is implemented*************************/
     	SharedPreferences listSettings = getPreferences(MODE_PRIVATE);
     	String listType = listSettings.getString(PrintListMenuActivity.LIST_TYPE, PrintListMenuActivity.LIST_ALL);
-        // resets map if not null
-        if (objects != null) {
-            curr_map = new HashMap<String, PrinterEntryItem>();
-            all_map = new HashMap<String, PrinterEntryItem>();
-            for (ParseObject o : objects) {
-                //COMMON NAME
-                StringBuilder location = new StringBuilder(o.getString("location"));
-                if (o.getString("commonName") != null && o.getString("commonName").length() != 0) {
-                    location.append("#" + o.getString("commonName"));
-                }
-                all_map.put(o.getObjectId(), new PrinterEntryItem(o.getObjectId(),
-                            o.getString("printerName"), location.toString(),
-                            Integer.parseInt(o.getString("status"))));
-            	if (listType.equals(PrintListMenuActivity.LIST_ALL)) {
-            		PrinterEntryItem item = new PrinterEntryItem(o.getObjectId(),
-                            o.getString("printerName"), location.toString(),
-                            Integer.parseInt(o.getString("status")));
-                    curr_map.put(o.getObjectId(), item);
-            	}
-            	else if (listType.equals(PrintListMenuActivity.LIST_DORM)) {
-            		if (o.getBoolean("residence")) {
-            			PrinterEntryItem item = new PrinterEntryItem(o.getObjectId(),
-                                o.getString("printerName"), location.toString(),
-                                Integer.parseInt(o.getString("status")));
-                        curr_map.put(o.getObjectId(), item);
-            		}
-            	}
-            	else if (listType.equals(PrintListMenuActivity.LIST_CAMPUS)) {
-            		if (!o.getBoolean("residence")) {
-            			PrinterEntryItem item = new PrinterEntryItem(o.getObjectId(),
-                                o.getString("printerName"), location.toString(),
-                                Integer.parseInt(o.getString("status")));
-                        curr_map.put(o.getObjectId(), item);
-            		}
-            	}
-            	else {
-            		PrinterEntryItem item = new PrinterEntryItem(o.getObjectId(),
-                            o.getString("printerName"), location.toString(),
-                            Integer.parseInt(o.getString("status")));
-                    curr_map.put(o.getObjectId(), item);
-            	}
-            }
-        } else {
-            //handle error
-            curr_map = new HashMap<String, PrinterEntryItem>();
-        }
-
-        final List<Item> items = new ArrayList<Item>();
-        List<PrinterEntryItem> printers = null;
-        if (listType.equals(PrintListMenuActivity.LIST_FAVORITE)) {
-            mDbAdapter.open();
-            List<String> ids = mDbAdapter.getFavorites();
-            printers = new ArrayList<PrinterEntryItem>();
-            for (String id : ids) {
-                if (all_map.containsKey(id)) {
-                    printers.add(all_map.get(id));
-                }
-            }
-            mDbAdapter.close();
-
-        }
-        else {
-            printers = new ArrayList<PrinterEntryItem>(curr_map.values());
-
-        }
-        Collections.sort(printers, comparator);
-
-        if (printers.size() == 0) {
-        	if (listType.equals(PrintListMenuActivity.LIST_FAVORITE)) {
-        		items.add(new SectionItem("No favorites to display"));
-        	}
-        	else {
-        		items.add(new SectionItem("Check internet connection"));
-        	}
-        }
-        for (PrinterEntryItem item : printers) {
-            items.add(item);
-        }
-
+    	
+    	ListType type = ListType.ALL;
+    	if (listType.equals(PrintListMenuActivity.LIST_ALL)) {
+    		type = ListType.ALL;
+    	}
+    	else if (listType.equals(PrintListMenuActivity.LIST_CAMPUS)) {
+    		type = ListType.CAMPUS;
+    	}
+    	else if (listType.equals(PrintListMenuActivity.LIST_DORM)) {
+    		type = ListType.DORM;
+    	}
+    	else if (listType.equals(PrintListMenuActivity.LIST_FAVORITE)) {
+    		type = ListType.FAVORITE;
+    	}
+    	/*****************end temporary code ************************************/
+    	final ArrayList<Item> items = PrinterClient.getPrinterList(this, type, objects);
         Log.i(TAG, new Integer(items.size()).toString());
         EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>) items);
         setListAdapter(adapter);
