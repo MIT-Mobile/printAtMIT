@@ -36,6 +36,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.model.printer.PrinterComparator;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
@@ -63,16 +64,16 @@ public class PrinterListActivity extends ListActivity {
     private PrinterComparator comparator = new PrinterComparator();
     private final Context self = PrinterListActivity.this;
 
-    // Comparator to sort printers alphabetically
-    public class PrinterComparator implements Comparator<PrinterEntryItem> {
-
-
-        //@Override
-        public int compare(PrinterEntryItem item1, PrinterEntryItem item2) {
-            return item1.printerName.compareTo(item2.printerName);
-        }
-
-    }
+//    // Comparator to sort printers alphabetically
+//    public class PrinterComparator implements Comparator<PrinterEntryItem> {
+//
+//
+//        //@Override
+//        public int compare(PrinterEntryItem item1, PrinterEntryItem item2) {
+//            return item1.printerName.compareTo(item2.printerName);
+//        }
+//
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

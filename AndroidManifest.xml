@@ -61,7 +61,7 @@
         <activity android:name=".view.listPrinter.PrinterInfoActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>
         <activity android:name=".view.listPrinter.PrintListMenuActivity"></activity>
-        <activity android:name=".view.listPrinter.listPrinter.PrinterListActivity"
+        <activity android:name=".view.listPrinter.PrinterListActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>
     </application>
 
