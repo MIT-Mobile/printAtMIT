@@ -26,8 +26,12 @@
             </intent-filter>
         </activity>
  	    <activity android:name=".view.login.LoginActivity"></activity>
-        <activity android:name=".view.main.MainMenuActivity"
-            android:configChanges="keyboardHidden|orientation"></activity>
+        <activity android:name=".view.listPrinter.MainMenuActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar"></activity>
+        <activity android:name=".view.listPrinter.TestActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@android:style/Theme.NoTitleBar"></activity>
         <activity android:name=".view.main.SettingsActivity"
             android:configChanges="keyboardHidden|orientation"></activity>
         <activity android:name=".view.print.PrintDownloadsActivity"/>
@@ -62,6 +66,10 @@
                   android:configChanges="keyboardHidden|orientation"></activity>
         <activity android:name=".view.listPrinter.PrintListMenuActivity"></activity>
         <activity android:name=".view.listPrinter.PrinterListActivity"
+                  android:configChanges="keyboardHidden|orientation"></activity>
+        <activity android:name=".view.listPrinter.PrinterListCampusActivity"
+                  android:configChanges="keyboardHidden|orientation"></activity>
+        <activity android:name=".view.listPrinter.PrinterListDormActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>
     </application>
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
   
   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:background="@color/background"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
@@ -9,7 +10,6 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dip"
         android:layout_marginRight="6dip"
         android:layout_marginTop="6dip"
         android:layout_marginBottom="6dip"
@@ -26,6 +26,20 @@ android:layout_centerVertical="true"/>
     	    android:layout_height="wrap_content"
     	    android:layout_weight = "0.5"
     	    android:layout_toLeftOf="@id/print_list_helper">
+    	    
+    	    <Button
+			    android:id="@+id/favorite_button"
+			    android:drawableTop="@drawable/favorite_btn"
+			    android:background="@null"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="center_horizontal"
+			    android:layout_alignParentLeft="true"
+			    android:layout_marginTop="20dp"
+			    android:layout_marginLeft="5dp"
+			    android:textColor="@android:color/white"
+			    />
+    	    
 	        <TextView android:id="@+id/list_item_printer_name"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"
@@ -33,24 +47,29 @@ android:layout_centerVertical="true"/>
 	            android:textAppearance="?android:attr/textAppearanceLarge"
 	            android:ellipsize="marquee"
 	            android:layout_alignParentLeft = "true"
-	            android:fadingEdge="horizontal" />
+	            android:layout_marginLeft="27dp"
+	            android:fadingEdge="horizontal"
+	            android:textColor="@color/black" />
 	            
 	         <TextView android:id="@+id/list_item_printer_location"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"
 	            android:layout_below="@id/list_item_printer_name"
 	            android:layout_alignParentLeft = "true"
-	            android:textAppearance="?android:attr/textAppearanceSmall"
+	            android:textSize="13sp"
 	            android:singleLine="true"
-	            android:textColor="?android:attr/textColorSecondary" />
+	            android:layout_marginLeft="27dp"
+	            android:textColor="@color/black"/>
+	         
 	         <TextView android:id="@+id/list_item_printer_common_location"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"
 	            android:layout_below="@id/list_item_printer_location"
 	            android:layout_alignParentLeft = "true"
-	            android:textAppearance="?android:attr/textAppearanceSmall"
+	            android:layout_marginLeft="27dp"
+	            android:textSize="13sp"
 	            android:singleLine="true"
-	            android:textColor="?android:attr/textColorSecondary" />
+	            android:textColor="@color/black"/>
 		</RelativeLayout>
 		
     	<RelativeLayout
@@ -76,7 +95,7 @@ android:layout_centerVertical="true"/>
 	            android:layout_toLeftOf="@id/status_dot"
 	            android:textAppearance="?android:attr/textAppearanceSmall"
 	            android:singleLine="true"
-	            android:textColor="?android:attr/textColorSecondary"/>
+	            android:textColor="@color/black"/>
     	     
     	    
 	         

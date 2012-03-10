@@ -55,7 +55,7 @@ import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
+import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**

@@ -17,7 +17,6 @@ import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.PrinterListActivity.RefreshListTask;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 import android.app.Activity;
 import android.app.Dialog;

@@ -1,10 +1,7 @@
 package edu.mit.printAtMIT.view.listPrinter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -25,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,13 +35,11 @@ import com.parse.ParseQuery;
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.controller.client.PrinterClient;
 import edu.mit.printAtMIT.model.printer.ListType;
-import edu.mit.printAtMIT.model.printer.PrinterComparator;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
-import edu.mit.printAtMIT.view.list.SectionItem;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
+import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -56,35 +52,20 @@ import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 public class PrinterListActivity extends ListActivity {
     public static final String TAG = "PrinterListActivity";
-    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
-    private static final int REFRESH_ID = Menu.FIRST;
-
-    private final Context self = PrinterListActivity.this;
-
-
+//    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
+//    private static final int REFRESH_ID = Menu.FIRST;
+    
+    public static final int ALL_PRINTERS = 0;
+    public static final int CAMPUS_PRINTERS = 1;
+    public static final int DORM_PRINTERS = 2;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.i("PrinterListActivity", "Calling onCreate()");
-
-        Parse.initialize(this, "KIb9mNtPKDtkDk7FJ9W6b7MiAr925a10vNuCPRer",
-                "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
+    	super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
-        
-        SharedPreferences listType = getPreferences(MODE_PRIVATE);
-        Bundle extras = getIntent().getExtras(); 
-
-        if (extras != null) {
-        	SharedPreferences.Editor editor = listType.edit();
-        	String type = getIntent().getStringExtra(PrintListMenuActivity.LIST_TYPE);
-        	editor.putString(PrintListMenuActivity.LIST_TYPE, type);
-        	editor.commit();
-        	
-        	setTitle(type + " Printers");
-        }
 
         RefreshListTask task = new RefreshListTask();
-        task.execute(isConnected(self));
+        task.execute(isConnected(this));
     }
 
     @Override
@@ -114,7 +95,7 @@ public class PrinterListActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.refresh:
             RefreshListTask task = new RefreshListTask();
-            task.execute(isConnected(self));
+            task.execute(isConnected(this));
             return true;
 		case R.id.home:
 			intent = new Intent(
@@ -153,25 +134,7 @@ public class PrinterListActivity extends ListActivity {
      * Sets Views Should be called in UI thread
      */
     private void setListViewData(List<ParseObject> objects) {
-    	/***********temporary code until new look is implemented*************************/
-    	SharedPreferences listSettings = getPreferences(MODE_PRIVATE);
-    	String listType = listSettings.getString(PrintListMenuActivity.LIST_TYPE, PrintListMenuActivity.LIST_ALL);
-    	
-    	ListType type = ListType.ALL;
-    	if (listType.equals(PrintListMenuActivity.LIST_ALL)) {
-    		type = ListType.ALL;
-    	}
-    	else if (listType.equals(PrintListMenuActivity.LIST_CAMPUS)) {
-    		type = ListType.CAMPUS;
-    	}
-    	else if (listType.equals(PrintListMenuActivity.LIST_DORM)) {
-    		type = ListType.DORM;
-    	}
-    	else if (listType.equals(PrintListMenuActivity.LIST_FAVORITE)) {
-    		type = ListType.FAVORITE;
-    	}
-    	/*****************end temporary code ************************************/
-    	final ArrayList<Item> items = PrinterClient.getPrinterList(this, type, objects);
+    	final ArrayList<Item> items = PrinterClient.getPrinterList(this, ListType.ALL, objects);
         Log.i(TAG, new Integer(items.size()).toString());
         EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>) items);
         setListAdapter(adapter);

@@ -21,7 +21,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.printAtMIT.R;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
+import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**

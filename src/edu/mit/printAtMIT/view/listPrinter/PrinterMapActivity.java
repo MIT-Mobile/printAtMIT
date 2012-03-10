@@ -12,7 +12,6 @@ import com.google.android.maps.Overlay;
 
 
 import edu.mit.printAtMIT.R;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 import android.app.Dialog;
 import android.app.ProgressDialog;

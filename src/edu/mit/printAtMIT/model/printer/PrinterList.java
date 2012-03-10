@@ -119,6 +119,14 @@ public class PrinterList {
         		items.add(new SectionItem("Check internet connection"));
         	}
         }
+        switch(this.type) {
+        case ALL: items.add(new SectionItem("All Printers")); break;
+        case FAVORITE: items.add(new SectionItem("Favorites")); break;
+        case CAMPUS: items.add(new SectionItem("Campus Printers")); break;
+        case DORM: items.add(new SectionItem("Dorm Printers")); break;
+        default: items.add(new SectionItem("All Printers")); break;
+        }
+        
         for (PrinterEntryItem item : printers) {
             items.add(item);
         }

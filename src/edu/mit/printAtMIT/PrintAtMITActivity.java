@@ -2,22 +2,13 @@ package edu.mit.printAtMIT;
 
 import com.parse.Parse;
 
-import edu.mit.printAtMIT.view.listPrinter.PrintListMenuActivity;
-import edu.mit.printAtMIT.view.main.SettingsActivity;
-import edu.mit.printAtMIT.view.print.PrintMenuActivity;
+import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.content.Intent;
 import android.content.res.Configuration;
 
@@ -42,15 +33,11 @@ public class PrintAtMITActivity extends Activity {
         settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         if (settings.getString(USERNAME, "").equals("")) {
-            // Intent intent = new Intent(this, LoginActivity.class);
-            // intent.putExtra("activity", "start");
-            // startActivity(intent);
             startLogin();
         } else {
-            // Intent intent = new Intent(this, MainMenuActivity.class);
-            // intent.putExtra("activity", "start");
-            // startActivity(intent);
-            startMainMenu();
+        	Intent intent = new Intent(this, MainMenuActivity.class);
+        	startActivity(intent);
+        	finish();
         }
     }
 
@@ -61,15 +48,11 @@ public class PrintAtMITActivity extends Activity {
                 "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
 
         if (settings.getString(USERNAME, "").equals("")) {
-            // Intent intent = new Intent(this, LoginActivity.class);
-            // intent.putExtra("activity", "start");
-            // startActivity(intent);
             startLogin();
         } else {
-            // Intent intent = new Intent(this, MainMenuActivity.class);
-            // intent.putExtra("activity", "start");
-            // startActivity(intent);
-            startMainMenu();
+        	Intent intent = new Intent(this, MainMenuActivity.class);
+        	startActivity(intent);
+        	finish();
         }
     }
     private void startLogin() {
@@ -93,38 +76,12 @@ public class PrintAtMITActivity extends Activity {
 
                     // Commit the edits!
                     editor.commit();
-//                    Intent intent = new Intent(view.getContext(),
-//                            MainMenuActivity.class);
-//                    startActivity(intent);
-                    startMainMenu();
+
+                    Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
+                	startActivity(intent);
+                	finish();
 
                 }
-            }
-        });
-    }
-
-    private void startMainMenu() {
-        setContentView(R.layout.main_menu);
-
-
-        Button button01 = (Button) findViewById(R.id.button01);
-        Button button02 = (Button) findViewById(R.id.button02);
-        button01.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(),
-                        PrintMenuActivity.class);
-                intent.putExtra("activity", "mainmenu");
-                startActivity(intent);
-            }
-        });
-
-        button02.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(),
-                        PrintListMenuActivity.class);
-                startActivity(intent);
             }
         });
     }
@@ -133,49 +90,49 @@ public class PrintAtMITActivity extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
+//
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        if (!settings.getString(USERNAME, "").equals("")) {
+//            MenuInflater inflater = getMenuInflater();
+//            inflater.inflate(R.menu.mainmenu_menu, menu);
+//        }
+//        return true;
+//    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!settings.getString(USERNAME, "").equals("")) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.mainmenu_menu, menu);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (!settings.getString(USERNAME, "").equals("")) {
-            // Handle item selection
-            switch (item.getItemId()) {
-            case R.id.setting:
-                Intent intent = new Intent(findViewById(android.R.id.content)
-                        .getContext(), SettingsActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.about:
-            	showAboutDialog();
-                super.onOptionsItemSelected(item);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-            }
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        if (!settings.getString(USERNAME, "").equals("")) {
+//            // Handle item selection
+//            switch (item.getItemId()) {
+//            case R.id.setting:
+//                Intent intent = new Intent(findViewById(android.R.id.content)
+//                        .getContext(), SettingsActivity.class);
+//                startActivity(intent);
+//                return true;
+//            case R.id.about:
+//            	showAboutDialog();
+//                super.onOptionsItemSelected(item);
+//                return true;
+//            default:
+//                return super.onOptionsItemSelected(item);
+//            }
+//        } else {
+//            return super.onOptionsItemSelected(item);
+//        }
+//    }
     
-    private void showAboutDialog() {
-		showDialog(0);
-	}
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		final Dialog dialog = new Dialog(this);
-    	dialog.setContentView(R.layout.about_dialog);
-    	dialog.setTitle("About");
-    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
-    	Linkify.addLinks(tv, Linkify.ALL);
-    	tv.setMovementMethod(LinkMovementMethod.getInstance());
-		return dialog;
-	}
+//    private void showAboutDialog() {
+//		showDialog(0);
+//	}
+//	@Override
+//	protected Dialog onCreateDialog(int id) {
+//		final Dialog dialog = new Dialog(this);
+//    	dialog.setContentView(R.layout.about_dialog);
+//    	dialog.setTitle("About");
+//    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
+//    	Linkify.addLinks(tv, Linkify.ALL);
+//    	tv.setMovementMethod(LinkMovementMethod.getInstance());
+//		return dialog;
+//	}
 }

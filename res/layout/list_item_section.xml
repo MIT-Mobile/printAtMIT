@@ -3,10 +3,21 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:padding="3dp"
+	android:background="@color/section_header">
 
-	<include
+	<!-- <include
 		android:id="@+id/list_item_section_text"
-		layout="@android:layout/preference_category" />
+		android:background="@color/section_header"
+		layout="@android:layout/preference_category" />-->
+	<TextView android:id="@+id/list_item_section_text"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_alignParentLeft = "true"
+	            android:textSize="13sp"
+	            android:layout_marginLeft="2dp"
+	            android:singleLine="true"
+	            android:textColor="@color/white" />
 
 </LinearLayout>

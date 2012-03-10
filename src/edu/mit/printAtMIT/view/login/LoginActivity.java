@@ -3,7 +3,7 @@ package edu.mit.printAtMIT.view.login;
 import edu.mit.printAtMIT.R;
 
 import edu.mit.printAtMIT.PrintAtMITActivity;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
+import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

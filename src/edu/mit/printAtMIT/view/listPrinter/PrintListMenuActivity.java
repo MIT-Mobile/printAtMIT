@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import edu.mit.printAtMIT.R;
-import edu.mit.printAtMIT.view.main.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /***
