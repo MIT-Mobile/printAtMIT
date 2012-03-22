@@ -1,11 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Print Downloads" />
-</ListLayout>
+    android:orientation="vertical" 
+    android:background="@color/background">
+    <RelativeLayout
+	        android:background="@drawable/action_bar"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:maxHeight="35dp"
+	        >
+	        <ImageView
+	            android:id="@+id/bar_logo"
+	            android:src="@drawable/bar_logo"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_alignParentLeft="true"
+	            android:layout_marginTop="12dp"
+	            android:layout_marginLeft="12dp"
+	            />
+	        <Button
+	            android:id="@+id/settings_icon"
+	            android:drawableTop="@drawable/settings_icon"
+	            android:background="@null"
+	            android:layout_width="wrap_content"
+	            android:layout_height="35dp"
+	            android:layout_alignParentRight="true"
+	            android:layout_marginTop="9dp"
+	            android:layout_marginRight="12dp"
+	            />
+	        <Button
+	            android:id="@+id/printer_icon"
+	            android:drawableTop="@drawable/printer_icon"
+	            android:background="@null"
+	            android:layout_toLeftOf="@id/settings_icon"
+	            android:layout_width="wrap_content"
+	            android:layout_height="35dp"
+	            android:layout_marginTop="9dp"
+	            android:layout_marginRight="17dp"
+	            />
+	        <Button
+	            android:id="@+id/list_icon"
+	            android:drawableTop="@drawable/list_icon"
+	            android:background="@null"
+	            android:layout_toLeftOf="@id/printer_icon"
+	            android:layout_width="wrap_content"
+	            android:layout_height="35dp"
+	            android:layout_marginTop="9dp"
+	            android:layout_marginRight="17dp"
+	            />
+	        
+	        
+	    </RelativeLayout>
+	   <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@color/background"
+        android:cacheColorHint="@color/background"
+        android:drawSelectorOnTop="false" />
+</LinearLayout>

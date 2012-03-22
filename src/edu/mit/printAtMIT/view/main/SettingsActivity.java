@@ -43,6 +43,7 @@ import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import edu.mit.printAtMIT.view.print.Lpr;
+import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
 /**
  * Users can reset their kerberos ID here
@@ -118,6 +119,36 @@ public class SettingsActivity extends ListActivity {
         	queue = "color";
         else
         	queue = "bw";
+        
+        Button settingsButton = (Button) findViewById(R.id.settings_icon);
+    	Button listButton = (Button) findViewById(R.id.list_icon);
+    	Button printButton = (Button) findViewById(R.id.printer_icon);
+    	
+    	printButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						PrintMenuActivity.class);
+				startActivity(intent);
+			}
+		});
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+    	
+    	listButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						MainMenuActivity.class);
+				startActivity(intent);
+			}
+		});
     }
     
     @Override

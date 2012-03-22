@@ -19,7 +19,7 @@
         <activity
             android:name=".PrintAtMITActivity"
             android:label="print@mit"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/printatmitTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -28,16 +28,20 @@
  	    <activity android:name=".view.login.LoginActivity"></activity>
         <activity android:name=".view.listPrinter.MainMenuActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.NoTitleBar"></activity>
+            android:theme="@style/printatmitTheme"></activity>
         <activity android:name=".view.listPrinter.TestActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.NoTitleBar"></activity>
+            android:theme="@style/printatmitTheme"></activity>
         <activity android:name=".view.main.SettingsActivity"
-            android:configChanges="keyboardHidden|orientation"></activity>
-        <activity android:name=".view.print.PrintDownloadsActivity"/>
-        <activity android:name=".view.print.PrintMenuActivity" />
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme"></activity>
+        <activity android:name=".view.print.PrintDownloadsActivity"
+            android:theme="@style/printatmitTheme"/>
+        <activity android:name=".view.print.PrintMenuActivity" 
+             android:theme="@style/printatmitTheme"/>
         <activity android:name=".view.print.PrintOptionsActivity"
-            android:configChanges="keyboardHidden|orientation">
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme">
     		<intent-filter>
         		<action android:name="android.intent.action.VIEW" />
         		<category android:name="android.intent.category.DEFAULT" />

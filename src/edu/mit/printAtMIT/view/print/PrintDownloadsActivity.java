@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +36,7 @@ public class PrintDownloadsActivity extends FileViewActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.print_downloads);
 		files = Environment
 				.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
@@ -102,6 +104,36 @@ public class PrintDownloadsActivity extends FileViewActivity {
 							"Invalid file type", Toast.LENGTH_SHORT).show();
 				}
 
+			}
+		});
+		
+		Button settingsButton = (Button) findViewById(R.id.settings_icon);
+    	Button listButton = (Button) findViewById(R.id.list_icon);
+    	Button printButton = (Button) findViewById(R.id.printer_icon);
+    	
+    	printButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						PrintMenuActivity.class);
+				startActivity(intent);
+			}
+		});
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+    	
+    	listButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						MainMenuActivity.class);
+				startActivity(intent);
 			}
 		});
 	}

@@ -9,4 +9,8 @@
     <color name = "red">#cb1212</color>
     <color name = "tab_background">#4d4d4d</color>
     <color name = "section_header">#640a0a</color>
+    
+    <style name="printatmitTheme" parent="android:Theme.NoTitleBar">
+	    <item name="android:windowBackground">@color/background</item>
+	</style>
 </resources>

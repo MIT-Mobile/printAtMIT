@@ -3,19 +3,14 @@ package edu.mit.printAtMIT.view.print;
 import java.io.File;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Html;
-import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -52,12 +47,31 @@ public class PrintMenuActivity extends Activity {
 		});
 		
 		Button imagesButton = (Button) findViewById(R.id.images_image);
+		Button settingsButton = (Button) findViewById(R.id.settings_icon);
+    	Button listButton = (Button) findViewById(R.id.list_icon);
 		imagesButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View view) {
 				Intent i = new Intent(Intent.ACTION_PICK,
 			               android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 				startActivityForResult(i, PICK_IMAGE);
+			}
+		});
+    	settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+    	
+    	listButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						MainMenuActivity.class);
+				startActivity(intent);
 			}
 		});
 	}

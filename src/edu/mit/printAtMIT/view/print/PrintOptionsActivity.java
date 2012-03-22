@@ -106,17 +106,17 @@ public class PrintOptionsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.print_options);
         
-        Button btnStart = (Button) findViewById(R.id.print_button);
-
-        btnStart.setOnClickListener(new View.OnClickListener() {
- 			
- 			
- 			public void onClick(View v) {
- 				ConvertAndPrintTask printTask = new ConvertAndPrintTask();
-                 printTask.execute();
- 				
- 			}
- 		});
+//        Button btnStart = (Button) findViewById(R.id.print_button);
+//
+//        btnStart.setOnClickListener(new View.OnClickListener() {
+// 			
+// 			
+// 			public void onClick(View v) {
+// 				ConvertAndPrintTask printTask = new ConvertAndPrintTask();
+//                 printTask.execute();
+// 				
+// 			}
+// 		});
         
         Intent i = getIntent();
         // when called from opening a file or image outside of app (view intent)
@@ -178,11 +178,7 @@ public class PrintOptionsActivity extends ListActivity {
         	queue = "color";
         else
         	queue = "bw";
-        
-        /*TextView text = (TextView) findViewById(R.id.list_item_entry_title);
-        text.setText(fileName);
-        TextView text2 = (TextView) findViewById(R.id.list_item_entry_summary);
-        text.setText(fileLoc);  */
+
         items.add(new SectionItem("File name"));
         items.add(new EntryItem(fileName, fileLoc, ITEM_FILENAME));
         items.add(new SectionItem("Kerberos Id"));
@@ -191,16 +187,39 @@ public class PrintOptionsActivity extends ListActivity {
         items.add(new EntryItem("Ink Color", userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE), ITEM_INKCOLOR));
         items.add(new EntryItem("Copies", ""+userSettings.getInt(PrintAtMITActivity.COPIES, 1), ITEM_COPIES));
         
-        //items.add(new ButtonItem("Print", ITEM_PRINT_BUTTON));
-        //items.add(new EntryItem("Print", "", ITEM_PRINT_BUTTON));
         EntryAdapter adapter = new EntryAdapter(this, items);
         
         setListAdapter(adapter);
         
-        //this.getLayoutInflater().inflate(R.layout.print_options, getListView());
-        
-        
-        //textStatus = (TextView)findViewById(R.id.textStatus);
+        Button settingsButton = (Button) findViewById(R.id.settings_icon);
+    	Button listButton = (Button) findViewById(R.id.list_icon);
+    	Button printButton = (Button) findViewById(R.id.printer_icon);
+    	
+    	printButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						PrintMenuActivity.class);
+				startActivity(intent);
+			}
+		});
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+    	
+    	listButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						MainMenuActivity.class);
+				startActivity(intent);
+			}
+		});
     }
     
     @Override
