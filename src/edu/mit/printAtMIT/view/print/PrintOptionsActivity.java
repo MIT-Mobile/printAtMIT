@@ -51,6 +51,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.model.print.Lpr;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
@@ -106,17 +107,17 @@ public class PrintOptionsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.print_options);
         
-//        Button btnStart = (Button) findViewById(R.id.print_button);
-//
-//        btnStart.setOnClickListener(new View.OnClickListener() {
-// 			
-// 			
-// 			public void onClick(View v) {
-// 				ConvertAndPrintTask printTask = new ConvertAndPrintTask();
-//                 printTask.execute();
-// 				
-// 			}
-// 		});
+        Button btnStart = (Button) findViewById(R.id.print_button);
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+ 			
+ 			
+ 			public void onClick(View v) {
+ 				ConvertAndPrintTask printTask = new ConvertAndPrintTask();
+                 printTask.execute();
+ 				
+ 			}
+ 		});
         
         Intent i = getIntent();
         // when called from opening a file or image outside of app (view intent)

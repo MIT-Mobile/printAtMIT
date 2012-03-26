@@ -111,20 +111,22 @@ public class PrinterList {
         
         Collections.sort(printers, new PrinterComparator());
 
-        if (printers.size() == 0) {
-        	if (this.type == ListType.FAVORITE) {
-        		items.add(new SectionItem("No favorites to display"));
-        	}
-        	else {
-        		items.add(new SectionItem("Check internet connection"));
-        	}
-        }
         switch(this.type) {
         case ALL: items.add(new SectionItem("All Printers")); break;
         case FAVORITE: items.add(new SectionItem("Favorites")); break;
         case CAMPUS: items.add(new SectionItem("Campus Printers")); break;
         case DORM: items.add(new SectionItem("Dorm Printers")); break;
         default: items.add(new SectionItem("All Printers")); break;
+        }
+        
+        if (printers.size() == 0) {
+        	if (this.type == ListType.FAVORITE) {
+        		items.clear();
+        	}
+        	else {
+        		items.clear();
+        		items.add(new SectionItem("Check internet connection"));
+        	}
         }
         
         for (PrinterEntryItem item : printers) {

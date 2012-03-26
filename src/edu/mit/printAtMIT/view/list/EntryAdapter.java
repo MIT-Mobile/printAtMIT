@@ -3,11 +3,15 @@ package edu.mit.printAtMIT.view.list;
 import java.util.ArrayList;
 
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -57,7 +61,6 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                 else {
                 	v = vi.inflate(R.layout.printer_list_item_entry, null);
                 }
-                //final TextView text = (TextView) v.findViewById(R.id.list_item_text);
                 
                 final TextView printerName = (TextView) v
                         .findViewById(R.id.list_item_printer_name);
@@ -65,7 +68,7 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                         .findViewById(R.id.list_item_printer_location);
                 final TextView printerStatus = (TextView) v
                 		.findViewById(R.id.list_item_printer_status);
-                
+             
                 
                 if (printerName != null)
                 	printerName.setText(pei.printerName);
@@ -95,6 +98,43 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                 		circle.setImageResource(R.drawable.grey_dot);
                 	}
                 }
+                
+                final Button button = (Button) v.findViewById(R.id.favorite_button);
+            	button.setFocusable(false);
+            	
+            	// set favorite state of printer
+            	final PrintersDbAdapter mDbAdapter = new PrintersDbAdapter(this.context);
+                mDbAdapter.open();
+                final String id = pei.parseId;
+                boolean favorite = mDbAdapter.isFavorite(id);
+
+                if (favorite) {
+                    Drawable img = this.context.getResources().getDrawable( R.drawable.favorite_btn_pressed );
+                    button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                } else {
+                    Drawable img = this.context.getResources().getDrawable( R.drawable.favorite_btn );
+                    button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                }
+                mDbAdapter.close();
+                button.setOnClickListener(new View.OnClickListener() {
+             //       @Override
+                    public void onClick(View v) {
+                    	Log.i("MainMenuActivity", "clicking favorite button");
+                    	 mDbAdapter.open();
+                        if (mDbAdapter.isFavorite(id)) {
+                            mDbAdapter.removeFavorite(id);
+//                            Drawable img = v.getContext().getResources().getDrawable( R.drawable.favorite_btn_pressed );
+//                            button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                        } else {
+                            mDbAdapter.addToFavorites(id);
+//                            Drawable img = v.getContext().getResources().getDrawable( R.drawable.favorite_btn );
+//                            button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                        }
+                        mDbAdapter.close();
+                    }
+
+                });
+                
             } else if (!i.isButton()) {
                 EntryItem ei = (EntryItem) i;
                 v = vi.inflate(R.layout.list_item_entry, null);

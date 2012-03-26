@@ -121,7 +121,7 @@ public class PrinterInfoActivity extends ListActivity {
         RefreshTask task = new RefreshTask();
         task.execute();
 
-       // mDbAdapter.close();
+        mDbAdapter.close();
     }
 
     @Override

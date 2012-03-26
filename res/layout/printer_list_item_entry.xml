@@ -48,7 +48,9 @@ android:layout_centerVertical="true"/>
 	            android:layout_alignParentLeft = "true"
 	            android:layout_marginLeft="27dp"
 	            android:fadingEdge="horizontal" 
-	            android:textColor="@color/black"/>
+	            android:textColor="@color/black"
+	            android:focusable="false"
+				android:focusableInTouchMode="false"/>
 	            
 	         <TextView android:id="@+id/list_item_printer_location"
 	            android:layout_width="fill_parent"
@@ -58,7 +60,9 @@ android:layout_centerVertical="true"/>
 	            android:layout_marginLeft="27dp"
 	            android:textSize="13sp"
 	            android:singleLine="true"
-	            android:textColor="@color/black" />
+	            android:textColor="@color/black" 
+	            android:focusable="false"
+				android:focusableInTouchMode="false"/>
 		</RelativeLayout>
 		
     	<RelativeLayout

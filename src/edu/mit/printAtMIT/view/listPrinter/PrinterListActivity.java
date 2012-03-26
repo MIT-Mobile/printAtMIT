@@ -130,18 +130,23 @@ public class PrinterListActivity extends ListActivity {
     	tv.setMovementMethod(LinkMovementMethod.getInstance());
 		return dialog;
 	}
+
+	 
     /**
      * Sets Views Should be called in UI thread
      */
     private void setListViewData(List<ParseObject> objects) {
-    	final ArrayList<Item> items = PrinterClient.getPrinterList(this, ListType.ALL, objects);
+    	ArrayList<Item> favs = PrinterClient.getPrinterList(this, ListType.FAVORITE, objects);
+    	ArrayList<Item> all = PrinterClient.getPrinterList(this, ListType.ALL, objects);
+    	favs.addAll(all);
+    	final ArrayList<Item> items = favs;
         Log.i(TAG, new Integer(items.size()).toString());
         EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>) items);
         setListAdapter(adapter);
 
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
-
+        lv.setItemsCanFocus(false);
         lv.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view,
