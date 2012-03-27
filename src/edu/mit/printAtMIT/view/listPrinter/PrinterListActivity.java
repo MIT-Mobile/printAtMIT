@@ -8,7 +8,6 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -22,12 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -39,7 +36,6 @@ import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
-import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -130,7 +126,6 @@ public class PrinterListActivity extends ListActivity {
     	tv.setMovementMethod(LinkMovementMethod.getInstance());
 		return dialog;
 	}
-
 	 
     /**
      * Sets Views Should be called in UI thread
@@ -146,7 +141,7 @@ public class PrinterListActivity extends ListActivity {
 
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
-        lv.setItemsCanFocus(false);
+        //lv.setItemsCanFocus(false);
         lv.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view,

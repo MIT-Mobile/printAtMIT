@@ -27,19 +27,17 @@ android:layout_centerVertical="true"/>
     	    android:layout_weight = "0.5"
     	    android:layout_toLeftOf="@id/print_list_helper">
     	    
-    	    <Button
+    	    <ImageView
 			    android:id="@+id/favorite_button"
-			    android:drawableTop="@drawable/favorite_btn"
 			    android:background="@null"
 			    android:layout_width="wrap_content"
 			    android:layout_height="wrap_content"
 			    android:layout_gravity="center_horizontal"
 			    android:layout_alignParentLeft="true"
-			    android:layout_marginTop="20dp"
+			    android:layout_marginTop="13dp"
 			    android:layout_marginLeft="5dp"
 			    android:textColor="@android:color/white"
 			    />
-    	    
 	        <TextView android:id="@+id/list_item_printer_name"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"

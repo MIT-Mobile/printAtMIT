@@ -2,12 +2,10 @@ package edu.mit.printAtMIT.view.listPrinter;
 
 import com.parse.Parse;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -17,15 +15,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TabHost;
-import android.widget.Toast;
-import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TextView;
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.view.main.SettingsActivity;

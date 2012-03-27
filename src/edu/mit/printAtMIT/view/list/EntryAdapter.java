@@ -5,13 +5,11 @@ import java.util.ArrayList;
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -98,10 +96,8 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                 		circle.setImageResource(R.drawable.grey_dot);
                 	}
                 }
-                
-                final Button button = (Button) v.findViewById(R.id.favorite_button);
-            	button.setFocusable(false);
-            	
+                final ImageView favButton = (ImageView) v.findViewById(R.id.favorite_button);
+        	
             	// set favorite state of printer
             	final PrintersDbAdapter mDbAdapter = new PrintersDbAdapter(this.context);
                 mDbAdapter.open();
@@ -109,31 +105,27 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                 boolean favorite = mDbAdapter.isFavorite(id);
 
                 if (favorite) {
-                    Drawable img = this.context.getResources().getDrawable( R.drawable.favorite_btn_pressed );
-                    button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                    favButton.setImageResource(R.drawable.favorite_btn_pressed);
                 } else {
-                    Drawable img = this.context.getResources().getDrawable( R.drawable.favorite_btn );
-                    button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
+                	favButton.setImageResource(R.drawable.favorite_btn);
                 }
                 mDbAdapter.close();
-                button.setOnClickListener(new View.OnClickListener() {
-             //       @Override
-                    public void onClick(View v) {
+                
+                favButton.setOnClickListener(new View.OnClickListener() {
+					
+					public void onClick(View v) {
                     	Log.i("MainMenuActivity", "clicking favorite button");
-                    	 mDbAdapter.open();
-                        if (mDbAdapter.isFavorite(id)) {
-                            mDbAdapter.removeFavorite(id);
-//                            Drawable img = v.getContext().getResources().getDrawable( R.drawable.favorite_btn_pressed );
-//                            button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-                        } else {
-                            mDbAdapter.addToFavorites(id);
-//                            Drawable img = v.getContext().getResources().getDrawable( R.drawable.favorite_btn );
-//                            button.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-                        }
-                        mDbAdapter.close();
-                    }
-
-                });
+	                   	 mDbAdapter.open();
+	                       if (mDbAdapter.isFavorite(id)) {
+	                           mDbAdapter.removeFavorite(id);
+	                           favButton.setImageResource(R.drawable.favorite_btn);
+	                       } else {
+	                           mDbAdapter.addToFavorites(id);
+	                           favButton.setImageResource(R.drawable.favorite_btn_pressed);
+	                       }
+	                       mDbAdapter.close();
+					}
+				});
                 
             } else if (!i.isButton()) {
                 EntryItem ei = (EntryItem) i;
