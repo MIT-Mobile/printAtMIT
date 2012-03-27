@@ -125,21 +125,31 @@ public class PrintOptionsActivity extends ListActivity {
         if (data != null) {
         	String scheme = data.getScheme();
         	
-        	// opening an image
+        	// opening an image that's in gallery or previewing from gmail
         	if (scheme.equals("content")){
-        		fileLoc = getImageFile(data);
-        		File f = new File(fileLoc);
-        		fileName = f.getName();
-        		type = IMAGE;
+        	    if (data.getHost().equals("gmail-ls")){
+        	        Log.d("PrintOptionsActivity", "gmail preview - don't do anything");
+        	        Toast.makeText(this, "Please download item to device before printing", Toast.LENGTH_SHORT).show();
+        	    }
+        	    if (data.getHost().equals("media")){
+        	        fileLoc = getImageFile(data);
+        	        File f = new File(fileLoc);
+        	        fileName = f.getName();
+        	        type = IMAGE;
+        	    }
         	}
-        	// opening a file
+        	// opening a file or image not in gallery (ex: downloaded from gmail)
         	if (scheme.equals("file")){
         		File f = new File(data.getPath());
         		fileLoc = f.getPath().toString();
         		fileName = f.getName();
+        		
+        		// must be an image
+                if (!(fileName.endsWith(".pdf") || fileName.endsWith(".ps") || fileName.endsWith(".txt")))
+                    type = IMAGE;
         	}
         }
-    	// gotten from send intent or print activity
+    	// gotten from send (share) intent or print activity
         else {
         	// get url from sharing web page (send intent)
         	Bundle extras = i.getExtras();
