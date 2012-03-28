@@ -18,9 +18,9 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 import edu.mit.printAtMIT.R;
-import edu.mit.printAtMIT.view.listPrinter.PrinterInfoActivity.RefreshTask;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
@@ -47,7 +47,6 @@ public class MainMenuActivity extends TabActivity{
         addTab(tabHost, PrinterListActivity.ALL_PRINTERS, R.drawable.all_tab);
         addTab(tabHost, PrinterListActivity.CAMPUS_PRINTERS, R.drawable.campus_tab);
         addTab(tabHost, PrinterListActivity.DORM_PRINTERS, R.drawable.dorm_tab);
-
         tabHost.setCurrentTab(0);
         
     	Button settingsButton = (Button) findViewById(R.id.settings_icon);
@@ -112,6 +111,37 @@ public class MainMenuActivity extends TabActivity{
     @Override
     public void onConfigurationChanged(Configuration newConfig){
         super.onConfigurationChanged(newConfig);
+        // changing the tab icons based on orientation
+        TabHost tabhost = getTabHost();
+        TabWidget tabWidget = tabhost.getTabWidget();
+        View all_printers = tabWidget.getChildAt(0);
+        
+        int all_tab;
+        int campus_tab;
+        int dorm_tab;
+        
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        	all_tab = R.drawable.all_tab_landscape;
+        	campus_tab = R.drawable.campus_tab_landscape;
+        	dorm_tab = R.drawable.dorm_tab_landscape;
+        }
+        else {
+        	all_tab = R.drawable.all_tab;
+        	campus_tab = R.drawable.campus_tab;
+        	dorm_tab = R.drawable.dorm_tab;
+        }
+        
+        ImageView all_icon = (ImageView) all_printers.findViewById(R.id.icon);
+        all_icon.setImageResource(all_tab);
+
+        
+        View campus_printers = tabWidget.getChildAt(1);
+        ImageView campus_icon = (ImageView) campus_printers.findViewById(R.id.icon);
+        campus_icon.setImageResource(campus_tab);
+        
+        View dorm_printers = tabWidget.getChildAt(2);
+        ImageView dorm_icon = (ImageView) dorm_printers.findViewById(R.id.icon);
+        dorm_icon.setImageResource(dorm_tab);
     }
     
     @Override
