@@ -91,8 +91,6 @@ public class PrintOptionsActivity extends ListActivity {
 	private static final int ITEM_USERNAME = 3;
 	private static final int ITEM_INKCOLOR = 5;
 	private static final int ITEM_COPIES = 6;
-	private static final int ITEM_PRINT_BUTTON = 7;
-
 	private String getImageFile(Uri imageUri){
 		String[] projection = { MediaStore.Images.Media.DATA };
 		Cursor cursor = managedQuery( imageUri, projection, null, null, null );
@@ -236,27 +234,14 @@ public class PrintOptionsActivity extends ListActivity {
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.printmenu_menu, menu);
+		inflater.inflate(R.menu.mainmenu_menu, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent;
 		switch (item.getItemId()) {
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
 		case R.id.about:
 			showAboutDialog();
 			super.onOptionsItemSelected(item);

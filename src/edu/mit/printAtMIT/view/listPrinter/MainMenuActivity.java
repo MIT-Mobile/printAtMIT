@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.view.listPrinter.PrinterInfoActivity.RefreshTask;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
@@ -116,7 +117,7 @@ public class MainMenuActivity extends TabActivity{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu_menu, menu);
+        inflater.inflate(R.menu.printlist_menu, menu);
         return true;
     }
     
@@ -124,10 +125,6 @@ public class MainMenuActivity extends TabActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-        case R.id.setting:
-        	Intent intent = new Intent(findViewById(android.R.id.content).getContext(), SettingsActivity.class);
-        	startActivity(intent);
-            return true;
         case R.id.about:
 	    	Dialog dialog = new Dialog(this);
 	    	dialog.setContentView(R.layout.about_dialog);

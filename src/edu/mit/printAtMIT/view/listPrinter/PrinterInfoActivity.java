@@ -138,25 +138,12 @@ public class PrinterInfoActivity extends MapActivity{
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		Intent intent;
+		// Handle item selections
 		switch (item.getItemId()) {
 		case R.id.refresh:
 			RefreshTask task = new RefreshTask();
             task.execute();
             return true;
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
 		case R.id.about:
 			showAboutDialog();
 			super.onOptionsItemSelected(item);
