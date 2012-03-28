@@ -1,26 +1,25 @@
 package edu.mit.printAtMIT.view.listPrinter;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+import com.google.android.maps.Overlay;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
-import edu.mit.printAtMIT.view.list.EntryAdapter;
-import edu.mit.printAtMIT.view.list.EntryItem;
-import edu.mit.printAtMIT.view.list.Item;
-import edu.mit.printAtMIT.view.list.PrinterEntryItem;
-import edu.mit.printAtMIT.view.list.SectionItem;
-import edu.mit.printAtMIT.view.listPrinter.PrinterListActivity.RefreshListTask;
+import edu.mit.printAtMIT.model.printer.StatusType;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
-import android.app.Activity;
+import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +45,7 @@ import android.widget.Toast;
  * 
  * Menu: Refresh View on Map Home Settings About
  */
-public class PrinterInfoActivity extends ListActivity {
+public class PrinterInfoActivity extends MapActivity{
     public static final String TAG = "PrinterInfoActivity";
     public static final String REFRESH_ERROR = "Error getting data, please be sure you are connected to the MIT network";
 
@@ -54,10 +53,20 @@ public class PrinterInfoActivity extends ListActivity {
 
     private PrintersDbAdapter mDbAdapter;
     private boolean favorite;
-    private Button button02;
     private String id;
+    
+    public static final int MIT_CENTER_LAT = 42359425;
+    public static final int MIT_CENTER_LONG = -71094735;
 
-    @Override
+    MapView mapView;
+    List<Overlay> mapOverlays;
+    Drawable drawable;
+    PrinterItemizedOverlay itemizedOverlay;
+    FixedMyLocationOverlay myLocationOverlay;
+    
+    private int centerLat;
+    private int centerLong;
+    
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i("PrinterInfoActivity", "onCreate");
@@ -68,60 +77,39 @@ public class PrinterInfoActivity extends ListActivity {
         Bundle extras = getIntent().getExtras();
         id = extras.getString("id");
 
-        // set favorite state of printer
-        mDbAdapter = new PrintersDbAdapter(this);
-        mDbAdapter.open();
-        favorite = mDbAdapter.isFavorite(id);
-
-        Button button01 = (Button) findViewById(R.id.map_button);
-        button02 = (Button) findViewById(R.id.favorite_button);
-        
-        if (favorite) {
-            button02.setText("Remove from favorites");
-            Drawable img = this.getResources().getDrawable( R.drawable.btn_rating_star_off_pressed );
-            button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-        } else {
-            button02.setText("Add to favorites");
-            Drawable img = this.getResources().getDrawable( R.drawable.btn_rating_star_off_normal );
-            button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-        }
-        
-        button01.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                Intent intent = new Intent(view.getContext(),
-                        PrinterMapActivity.class);
-                intent.putExtra("id", id);
-                startActivity(intent);
-            }
-        });
-        button02.setOnClickListener(new View.OnClickListener() {
-
-
-     //       @Override
-            public void onClick(View v) {
-                Log.i(TAG, "clicking favorite button");
-                if (favorite) {
-                    mDbAdapter.removeFavorite(id);
-                    button02.setText("Add to Favorites");
-                    Drawable img = v.getContext().getResources().getDrawable( R.drawable.btn_rating_star_off_normal );
-                    button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-                    favorite = false;
-                } else {
-                    mDbAdapter.addToFavorites(id);
-                    button02.setText("Remove from Favorites");
-                    Drawable img = v.getContext().getResources().getDrawable( R.drawable.btn_rating_star_off_pressed );
-                    button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-                    favorite = true;
-                }
-            }
-
-        });
+        Button settingsButton = (Button) findViewById(R.id.settings_icon);
+    	Button listButton = (Button) findViewById(R.id.list_icon);
+    	Button printButton = (Button) findViewById(R.id.printer_icon);
+    	
+    	printButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						PrintMenuActivity.class);
+				startActivity(intent);
+			}
+		});
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						SettingsActivity.class);
+				startActivity(intent);
+			}
+		});
+    	
+    	listButton.setOnClickListener(new View.OnClickListener() {
+			
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),
+						MainMenuActivity.class);
+				startActivity(intent);
+			}
+		});
 
         RefreshTask task = new RefreshTask();
         task.execute();
 
-        mDbAdapter.close();
     }
 
     @Override
@@ -129,23 +117,16 @@ public class PrinterInfoActivity extends ListActivity {
         super.onPause();
         Log.i("PrinterInfoActivity", "onPause");
         mDbAdapter.close();
+        if (myLocationOverlay != null) {
+            myLocationOverlay.disableMyLocation();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.i("PrinterInfoActivity", "onResume");
-        if (favorite) {
-            button02.setText("Remove from favorites");
-            Drawable img = this.getResources().getDrawable( R.drawable.btn_rating_star_off_pressed );
-            button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-        } else {
-            button02.setText("Add to favorites");
-            Drawable img = this.getResources().getDrawable( R.drawable.btn_rating_star_off_normal );
-            button02.setCompoundDrawablesWithIntrinsicBounds(null, img, null, null);
-        }
 
-        mDbAdapter.open();
     }
 
     @Override
@@ -214,14 +195,14 @@ public class PrinterInfoActivity extends ListActivity {
         return printer;
     }
 
-    private String getStatus(int code) {
+    private StatusType getStatus(int code) {
         switch (code) {
         case 0:
-            return "Ready";
+            return StatusType.READY;
         case 1:
-            return "Busy";
+            return StatusType.BUSY;
         case 2:
-            return "Error";
+            return StatusType.ERROR;
         default:
             Log.e(TAG, "shouldn't get here, yo");
             break;
@@ -229,94 +210,133 @@ public class PrinterInfoActivity extends ListActivity {
         return null;
     }
 
-    private void displayInfo(ParseObject printer) {
-    	final List<Item> items = new ArrayList<Item>();
-    	
-    	if (printer != null) {
-    		String location = printer.getString("location");
-    		if (printer.getString("commonName") != null && printer.getString("commonName").length() != 0) {
-    			location += "#" + printer.getString("commonName");
-    		}
-	    	PrinterEntryItem p = new PrinterEntryItem(printer.getObjectId(),
-	                printer.getString("printerName"), location,
-	                Integer.parseInt(printer.getString("status")));
-	    	
-	    	items.add(new SectionItem("Printer Info"));
-	    	items.add(p);
-	    	
-	        items.add(new SectionItem("Printer Details"));
-	//        items.add(new EntryItem("Ink Color", userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE), ITEM_INKCOLOR));
-	//        items.add(new EntryItem("Copies", ""+userSettings.getInt(PrintAtMITActivity.COPIES, 1), ITEM_COPIES));
-	        //items.add(new ButtonItem("Print Test Page", ITEM_PRINT_BUTTON));
-	
-	        if (printer.getString("PaperJamStatus") != null) {
-	        	items.add(new EntryItem("Paper Jam", printer.getString("PaperJamStatus"), 2));
-	        }
-	        else {
-	        	items.add(new EntryItem("Paper Jam", "Unavailable", 2));
-	        }
-	        if (printer.getString("PaperStatus") != null) {
-	        	items.add(new EntryItem("Paper Status", printer.getString("PaperStatus"), 3));
-	        }
-	        else {
-	        	items.add(new EntryItem("Paper Status", "Unavailable", 3));
-	        }
-	        if (printer.getString("TonerStatus") != null) {
-	        	items.add(new EntryItem("Toner Status", printer.getString("TonerStatus"), 4));
-	        }
-	        else {
-	        	items.add(new EntryItem("Toner Status", "Unavailable", 4));
-	        }
-	        EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>)items);
-	        
-	        setListAdapter(adapter);
-	        
-	        ListView lv = getListView();
-	        
-	        lv.setTextFilterEnabled(true);
+    private String getStatus(StatusType type) {
+    	switch(type) {
+    	case READY: return "Available";
+    	case BUSY: return "Busy";
+    	case ERROR: return "Error";
+    	default:
+    		return "Unknown";
     	}
     }
-    private String constructInfo(ParseObject printer) {
-        StringBuilder name = new StringBuilder("Printer Name: ");
-        /*StringBuilder info = new StringBuilder("Front Panel Message: " + "\n");*/
-        StringBuilder status = new StringBuilder("Status: ");
-        StringBuilder paperJam = new StringBuilder("Paper Jam: ");
-        StringBuilder paperStatus = new StringBuilder("Paper Status: ");
-        StringBuilder tonerStatus = new StringBuilder("Toner Status: ");
-        name.append(printer.getString("printerName"));
-        /*info.append(printer.getString("FrontPanelMessage") + "\n");*/
-        if (printer.getString("status") != null) {
-            status.append(this.getStatus(Integer.parseInt(printer
-                    .getString("status"))));
-        }
-        /*if (printer.getString("line2") != null) {
-            info.append(printer.getString("line2") + "\n");
-        }
-        if (printer.getString("line3") != null) {
-            info.append(printer.getString("line3") + "\n");
-        }
-        if (printer.getString("line4") != null) {
-            info.append(printer.getString("line4") + "\n");
-        }
-        if (printer.getString("line5") != null) {
-            info.append(printer.getString("line5"));
-        }*/
-        if (printer.getString("PaperJamStatus") != null) {
-            paperJam.append(printer.getString("PaperJamStatus"));
-        }
-        if (printer.getString("PaperStatus") != null) {
-            paperStatus.append(printer.getString("PaperStatus"));
-        }
-        if (printer.getString("TonerStatus") != null) {
-            tonerStatus.append(printer.getString("TonerStatus"));
-        }
+    private void displayInfo(ParseObject printer) {
+    	if (printer != null) {
+    		TextView printerName = (TextView) this.findViewById(R.id.list_item_printer_name);		
+    		TextView printerLocation = (TextView) this.findViewById(R.id.list_item_printer_location);
+    		TextView printerStatus = (TextView) this.findViewById(R.id.list_item_printer_status);
+    		
+    		if (printer.getString("commonName") != null && printer.getString("commonName").length() != 0) {
+    			TextView printer_common_loc = (TextView) this.findViewById(R.id.list_item_printer_common_location);
+    			
+    			if (printer_common_loc != null)
+    				printer_common_loc.setText(printer.getString("commonName"));
+    		}
+    		
+    		if (printerName != null)
+    			printerName.setText(printer.getString("printerName"));
+    		if (printerLocation != null)
+    			printerLocation.setText(printer.getString("location"));
+    		if (printerStatus != null) {
+    			StatusType statusType = getStatus(Integer.parseInt(printer.getString("status")));
+    			String status = getStatus(statusType);
+    			printerStatus.setText(status);
+    			ImageView circle = (ImageView) this.findViewById(R.id.status_dot);
+            	
+    			switch (statusType) {
+    			case READY: circle.setImageResource(R.drawable.green_dot); break;
+    			case BUSY: circle.setImageResource(R.drawable.yellow_dot); break;
+    			case ERROR: circle.setImageResource(R.drawable.red_dot); break;
+    			default: circle.setImageResource(R.drawable.grey_dot); break;
+    			}
+    		}
+    		  		
+    		final ImageView favButton = (ImageView) this.findViewById(R.id.favorite_button);
+        	
+        	// set favorite state of printer
+        	mDbAdapter = new PrintersDbAdapter(this);
+            mDbAdapter.open();
+            final String id = printer.getObjectId();
+            favorite = mDbAdapter.isFavorite(id);
 
-        String result = name.toString() + "\n\n"
-                + status.toString() + "\n\n" + paperJam.toString() + "\n\n"
-                + paperStatus.toString() + "\n\n" + tonerStatus.toString();
-        return result;
+            if (favorite) {
+                favButton.setImageResource(R.drawable.favorite_btn_pressed);
+            } else {
+            	favButton.setImageResource(R.drawable.favorite_btn);
+            }
+            mDbAdapter.close();
+            
+            favButton.setOnClickListener(new View.OnClickListener() {
+				
+				public void onClick(View v) {
+                	Log.i("MainMenuActivity", "clicking favorite button");
+                   	 mDbAdapter.open();
+                       if (favorite) {
+                           mDbAdapter.removeFavorite(id);
+                           favButton.setImageResource(R.drawable.favorite_btn);
+                       } else {
+                           mDbAdapter.addToFavorites(id);
+                           favButton.setImageResource(R.drawable.favorite_btn_pressed);
+                       }
+                       favorite = !favorite;
+                       mDbAdapter.close();
+				}
+			});
+            
+            /**
+             * map 
+             */
+            mapView = (MapView) findViewById(R.id.mapview);
+            mapView.setBuiltInZoomControls(true);
+            mapOverlays = mapView.getOverlays();
+            drawable = this.getResources().getDrawable(R.drawable.map_green_pin);
+
+            myLocationOverlay = new FixedMyLocationOverlay(this, mapView);
+            mapOverlays.add(myLocationOverlay);
+            mapView.postInvalidate();
+
+            itemizedOverlay = new PrinterItemizedOverlay(drawable, this, mapView);
+
+            MapController controller = mapView.getController();
+
+            // make mapview start at MIT if allView, else animate to selected
+            // printer loc
+
+                    centerLat = Integer.parseInt(printer.getString("latitude"));
+                    centerLong = Integer.parseInt(printer.getString("longitude"));
+
+            controller.setZoom(17);
+            controller.animateTo(new GeoPoint(centerLat, centerLong));
+
+            // add printer overlayitems to map
+                Log.i(TAG, printer.getString("status"));
+                GeoPoint point = new GeoPoint(Integer.parseInt(printer
+                        .getString("latitude")), Integer.parseInt(printer
+                        .getString("longitude")));
+                StatusType statusType = getStatus(Integer.parseInt(printer.getString("status")));
+                PrinterOverlayItem item = new PrinterOverlayItem(point,
+                        printer.getString("printerName") + " ("
+                                + printer.getString("location") + ")", "Status: "
+                                + getStatus(statusType),
+                        printer.getObjectId());
+
+                if (printer.getString("status").equals("1")) {
+                    drawable = this.getResources().getDrawable(
+                            R.drawable.map_yellow_pin);
+                } else if (printer.getString("status").equals("2")) {
+                    drawable = this.getResources().getDrawable(
+                            R.drawable.map_red_pin);
+                } else {
+                    drawable = this.getResources().getDrawable(
+                            R.drawable.map_green_pin);
+                }
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(),
+                        drawable.getIntrinsicHeight());
+                item.setMarker(drawable);
+                itemizedOverlay.addOverlay(item);
+
+            mapOverlays.add(itemizedOverlay);
+    	}
     }
-
     public class RefreshTask extends AsyncTask<Void, byte[], ParseObject> {
         private ProgressDialog dialog;
 
@@ -394,5 +414,10 @@ public class PrinterInfoActivity extends ListActivity {
         }
         return networkInfo == null ? false : networkInfo.isConnected();
     }
+
+	@Override
+	protected boolean isRouteDisplayed() {
+		return false;
+	}
 
 }
