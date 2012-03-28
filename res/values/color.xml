@@ -6,6 +6,8 @@
     <color name="transparent">#00000000 </color>
     <color name="button_blue">#2489ea</color>
     <color name = "background">#e9e2e2</color>
+    <color name = "background_dark">#6a6868</color>
+    <color name = "background_light">#f2f2f2</color>
     <color name = "red">#cb1212</color>
     <color name = "tab_background">#4d4d4d</color>
     <color name = "section_header">#640a0a</color>

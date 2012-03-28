@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
+import edu.mit.printAtMIT.model.printer.StatusType;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -79,22 +80,18 @@ public class EntryAdapter extends ArrayAdapter<Item> {
                 	}
                 }
                 if (printerStatus != null) {
-                	String status = pei.getStatusString();
+                	StatusType statusType = pei.getStatus();
+                	String status = pei.getStatusString(statusType);
                 	printerStatus.setText(status);
                 	ImageView circle = (ImageView) v.findViewById(R.id.status_dot);
                 	
-                	if (status.equals(PrinterEntryItem.READY)) {
-                		circle.setImageResource(R.drawable.green_dot);
-                	}
-                	else if (status.equals(PrinterEntryItem.BUSY)) {
-                		circle.setImageResource(R.drawable.yellow_dot);
-                	}
-                	else if (status.equals(PrinterEntryItem.ERROR)) {
-                		circle.setImageResource(R.drawable.red_dot);
-                	}
-                	else {
-                		circle.setImageResource(R.drawable.grey_dot);
-                	}
+                	switch (statusType) {
+        			case READY: circle.setImageResource(R.drawable.green_dot); break;
+        			case BUSY: circle.setImageResource(R.drawable.yellow_dot); break;
+        			case ERROR: circle.setImageResource(R.drawable.red_dot); break;
+        			default: circle.setImageResource(R.drawable.grey_dot); break;
+        			}
+                	
                 }
                 final ImageView favButton = (ImageView) v.findViewById(R.id.favorite_button);
         	

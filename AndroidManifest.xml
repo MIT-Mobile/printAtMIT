@@ -67,7 +67,8 @@
         </activity>
         
         <activity android:name=".view.listPrinter.PrinterInfoActivity"
-                  android:configChanges="keyboardHidden|orientation"></activity>
+                  android:configChanges="keyboardHidden|orientation"
+                  android:theme="@style/printatmitTheme"></activity>
         <activity android:name=".view.listPrinter.PrintListMenuActivity"></activity>
         <activity android:name=".view.listPrinter.PrinterListActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>

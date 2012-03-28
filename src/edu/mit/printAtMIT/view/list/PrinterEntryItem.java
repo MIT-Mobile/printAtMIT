@@ -1,5 +1,6 @@
 package edu.mit.printAtMIT.view.list;
 
+import edu.mit.printAtMIT.model.printer.StatusType;
 import android.util.Log;
 
 /**
@@ -44,16 +45,27 @@ public class PrinterEntryItem implements Item {
         return true;
     }
 
-    public String getStatusString() {
-        int status = this.status;
+    public String getStatusString(StatusType type) {
         String string = "";
-        switch(status) {
-            case 0: string = PrinterEntryItem.READY; break; //green
-            case 1: string = PrinterEntryItem.BUSY; break; //yellow
-            case 2: string = PrinterEntryItem.ERROR; break; //error
-            case 3: string = PrinterEntryItem.UNKNOWN; break; //grey
+        switch(type) {
+            case READY: string = PrinterEntryItem.READY; break; //green
+            case BUSY: string = PrinterEntryItem.BUSY; break; //yellow
+            case ERROR: string = PrinterEntryItem.ERROR; break; //error
+            case UNKNOWN: string = PrinterEntryItem.UNKNOWN; break; //grey
             default: Log.e("PrinterEntryItem", "Invalid printer status, thos hast problems"); break;
         }
         return string;
+    }
+    
+    public StatusType getStatus() {
+    	int status = this.status;
+    	switch(status) {
+    	case 0: return StatusType.READY; 
+    	case 1: return StatusType.BUSY;
+    	case 2: return StatusType.ERROR;
+    	case 3: return StatusType.UNKNOWN;
+    	default: Log.e("PrinterEntryItem", "Invalid printer status, thos hast problems"); break;
+    	}
+    	return null;
     }
 }
