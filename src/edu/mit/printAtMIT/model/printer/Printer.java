@@ -12,15 +12,18 @@ public class Printer {
 	private boolean atResidence;
 	private int status;
 	private double distance = 0.0;
-	
+	private int latitude;
+	private int longitude;
 	
 	public Printer(String name, String sectionHeader, String location,
-			String building, boolean atResidence, int status, double distance) {
+			String building, boolean atResidence, int status, int latitude, int longitude, double distance) {
 		this.name = name;
 		this.sectionHeader = sectionHeader;
 		this.location = location;
 		this.building = building;
 		this.atResidence = atResidence;
+		this.latitude = latitude;
+		this.longitude = longitude;
 		this.status = UNKNOWN_STATUS;
 		if (status == AVAILABLE_STATUS) {
 			this.status = AVAILABLE_STATUS;
@@ -60,5 +63,13 @@ public class Printer {
 	
 	public double getDistance() {
 		return this.distance;
+	}
+	
+	public int getLatitude() {
+	    return this.latitude;
+	}
+	
+	public int getLongitude() {
+	    return this.longitude;
 	}
 }

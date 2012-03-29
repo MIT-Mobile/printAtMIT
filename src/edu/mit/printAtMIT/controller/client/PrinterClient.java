@@ -1,6 +1,8 @@
 package edu.mit.printAtMIT.controller.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -23,16 +25,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import com.parse.ParseObject;
-
 import edu.mit.printAtMIT.model.printer.ListType;
 import edu.mit.printAtMIT.model.printer.Printer;
-import edu.mit.printAtMIT.model.printer.PrinterList;
+import edu.mit.printAtMIT.model.printer.PrinterComparator;
+import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
 import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.Item;
+import edu.mit.printAtMIT.view.list.PrinterEntryItem;
+import edu.mit.printAtMIT.view.list.SectionItem;
 
 public class PrinterClient {
-    public static final String URL_STRING = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=\"%s\"&latitude=%d&longitude=%d";
+    public static final String ALL_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%d&longitude=%d";
+    public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";
@@ -49,18 +53,126 @@ public class PrinterClient {
      *            , list of Parse Objects
      * @return ArrayList of Items
      */
-    public static ArrayList<Item> getPrinterList(Context context,
-            ListType type, List<ParseObject> objects) {
-        PrinterList printerList = new PrinterList(context, type);
-        return printerList.getList(objects);
+    // public static ArrayList<Item> getPrinterList(Context context,
+    // ListType type, List<ParseObject> objects) {
+    // PrinterList printerList = new PrinterList(context, type);
+    // return printerList.getList(objects);
+    // }
+
+    public static List<Item> getPrinterItemList(Context context, ListType type,
+            List<Printer> objects) {
+        HashMap<String, PrinterEntryItem> curr_map = new HashMap<String, PrinterEntryItem>();
+        HashMap<String, PrinterEntryItem> all_map = new HashMap<String, PrinterEntryItem>();
+
+        if (objects != null) {
+            curr_map = new HashMap<String, PrinterEntryItem>();
+            all_map = new HashMap<String, PrinterEntryItem>();
+            for (Printer o : objects) {
+                // COMMON NAME
+                StringBuilder location = new StringBuilder(o.getLocation());
+                if (o.getBuilding() != null && o.getBuilding().length() != 0) {
+                    location.append("#" + o.getBuilding());
+                }
+                all_map.put(o.getName(), new PrinterEntryItem(o.getName(),
+                        location.toString(), o.getStatus()));
+
+                if (type == ListType.ALL) {
+                    PrinterEntryItem item = new PrinterEntryItem(o.getName(),
+                            location.toString(), o.getStatus());
+                    curr_map.put(o.getName(), item);
+                } else if (type == ListType.DORM) {
+                    if (o.atResidence()) {
+                        PrinterEntryItem item = new PrinterEntryItem(
+                                o.getName(), location.toString(), o.getStatus());
+                        curr_map.put(o.getName(), item);
+                    }
+                } else if (type == ListType.CAMPUS) {
+                    if (!o.atResidence()) {
+                        PrinterEntryItem item = new PrinterEntryItem(
+                                o.getName(), location.toString(), o.getStatus());
+                        curr_map.put(o.getName(), item);
+                    }
+                } else {
+                    PrinterEntryItem item = new PrinterEntryItem(o.getName(),
+                            location.toString(), o.getStatus());
+                    curr_map.put(o.getName(), item);
+                }
+            }
+        } else {
+            // handle error
+            curr_map = new HashMap<String, PrinterEntryItem>();
+        }
+
+        final ArrayList<Item> items = new ArrayList<Item>();
+        ArrayList<PrinterEntryItem> printers = null;
+        if (type == ListType.FAVORITE) {
+            PrintersDbAdapter mDbAdapter = new PrintersDbAdapter(context);
+            mDbAdapter.open();
+            List<String> ids = mDbAdapter.getFavorites();
+            printers = new ArrayList<PrinterEntryItem>();
+            for (String id : ids) {
+                if (all_map.containsKey(id)) {
+                    printers.add(all_map.get(id));
+                }
+            }
+            mDbAdapter.close();
+
+        } else {
+            printers = new ArrayList<PrinterEntryItem>(curr_map.values());
+
+        }
+
+        // Collections.sort(printers, new PrinterComparator());
+
+        switch (type) {
+        case ALL:
+            items.add(new SectionItem("All Printers"));
+            break;
+        case FAVORITE:
+            items.add(new SectionItem("Favorites"));
+            break;
+        case CAMPUS:
+            items.add(new SectionItem("Campus Printers"));
+            break;
+        case DORM:
+            items.add(new SectionItem("Dorm Printers"));
+            break;
+        default:
+            items.add(new SectionItem("All Printers"));
+            break;
+        }
+
+        if (printers.size() == 0) {
+            if (type == ListType.FAVORITE) {
+                items.clear();
+            } else {
+                items.clear();
+                items.add(new SectionItem("Check internet connection"));
+            }
+        }
+
+        for (PrinterEntryItem item : printers) {
+            items.add(item);
+        }
+
+        return items;
     }
 
-    public static List<Printer> getPrinterList(ListType listtype,
-            SortType sorttype) throws PrinterClientException {
+    /**
+     * Retrieves list of sorted printers from database
+     * 
+     * @param sorttype
+     * @param latitude
+     * @param longitude
+     * @return
+     * @throws PrinterClientException
+     */
+    public static List<Printer> getAllPrinterObjects(SortType sorttype,
+            double latitude, double longitude) throws PrinterClientException {
         List<Printer> printers = new ArrayList<Printer>();
 
         try {
-            printers = requestPrinterList(listtype, sorttype, 0, 0);
+            printers = requestPrinterList(sorttype, latitude, longitude);
         } catch (ClientProtocolException e) {
             e.printStackTrace();
 
@@ -82,47 +194,19 @@ public class PrinterClient {
         return printers;
     }
 
-    public static List<Printer> getPrinterList(ListType listtype,
-            SortType sorttype, double latitude, double longitude) throws PrinterClientException {
-        List<Printer> printers = new ArrayList<Printer>();
-
-        try {
-            printers = requestPrinterList(listtype, sorttype, latitude, longitude);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-
-            throw new PrinterClientException("ClientProtocolException");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-
-            throw new PrinterClientException("URISyntaxException");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new PrinterClientException("IOException");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            throw new PrinterClientException("JSONException");
-        }
-
-        return printers;
-    }
-
-    private static List<Printer> requestPrinterList(ListType listtype,
-            SortType sorttype, double latitude, double longitude)
-            throws URISyntaxException, ClientProtocolException, IOException,
-            JSONException {
+    private static List<Printer> requestPrinterList(SortType sorttype,
+            double latitude, double longitude) throws URISyntaxException,
+            ClientProtocolException, IOException, JSONException {
         String uri = "";
         switch (sorttype) {
         case NAME:
-            uri = String.format(URL_STRING, "name", 0, 0);
+            uri = String.format(ALL_URL, "name", 0, 0);
             break;
         case BUILDING:
-            uri = String.format(URL_STRING, "building", 0, 0);
+            uri = String.format(ALL_URL, "building", 0, 0);
             break;
         case DISTANCE:
-            uri = String.format(URL_STRING, "distance", latitude, longitude);
+            uri = String.format(ALL_URL, "distance", latitude, longitude);
             break;
         default:
             Log.e("PrinterClient", "shouldn't reach here, yo");
@@ -141,11 +225,68 @@ public class PrinterClient {
             JSONObject o = jsonArray.getJSONObject(i);
             Printer printer = new Printer(o.getString("name"),
                     o.getString("section_header"), o.getString("location"),
-                    o.getString("building"), o.getBoolean("atResidence"),
-                    o.getInt("status"), o.getDouble("distance"));
+                    o.getString("building_name"), o.getBoolean("atResidence"),
+                    o.getInt("status"), o.getInt("latitude"),
+                    o.getInt("longitude"), o.getDouble("distance"));
             printers.add(printer);
         }
         return printers;
+    }
+
+    /**
+     * Retrieves information about one printer from backend
+     * 
+     * @param name
+     * @return
+     * @throws PrinterClientException
+     */
+    public static Printer getPrinterObject(String name)
+            throws PrinterClientException {
+        Printer printer = null;
+        String uri = String.format(PRINTER_QUERY_URL, name);
+        HttpClient client = new DefaultHttpClient();
+        HttpGet request = new HttpGet();
+        try {
+            request.setURI(new URI(uri));
+            HttpResponse response = client.execute(request);
+            HttpEntity entity = response.getEntity();
+            String json = Html.fromHtml(EntityUtils.toString(entity))
+                    .toString();
+            JSONTokener tokener = new JSONTokener(json);
+            JSONArray jsonArray = new JSONArray(tokener);
+            if (jsonArray.length() > 0) {
+                JSONObject object = jsonArray.getJSONObject(0);
+                printer = new Printer(object.getString("name"),
+                        object.getString("section_header"),
+                        object.getString("location"),
+                        object.getString("building_name"),
+                        object.getBoolean("atResidence"),
+                        object.getInt("status"), 
+                        object.getInt("latitude"),
+                        object.getInt("longitude"),
+                        object.getDouble("distance"));
+            } else {
+                Log.e("PrinterClientActivity", "json array length is 0");
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            throw new PrinterClientException("URISyntaxException");
+
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+            throw new PrinterClientException("ClientProtocolException");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new PrinterClientException("IOException");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new PrinterClientException("JSONException");
+
+        }
+        return printer;
+
     }
 
 }

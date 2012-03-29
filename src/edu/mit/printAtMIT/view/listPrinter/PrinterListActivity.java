@@ -25,13 +25,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.controller.client.PrinterClient;
+import edu.mit.printAtMIT.controller.client.PrinterClientException;
 import edu.mit.printAtMIT.model.printer.ListType;
+import edu.mit.printAtMIT.model.printer.Printer;
+import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
@@ -48,20 +47,29 @@ import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 public class PrinterListActivity extends ListActivity {
     public static final String TAG = "PrinterListActivity";
-//    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
-//    private static final int REFRESH_ID = Menu.FIRST;
-    
+    // private static final String REFRESH_ERROR =
+    // "Error connecting to network, please try again later";
+    // private static final int REFRESH_ID = Menu.FIRST;
+
     public static final int ALL_PRINTERS = 0;
     public static final int CAMPUS_PRINTERS = 1;
     public static final int DORM_PRINTERS = 2;
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
 
         RefreshListTask task = new RefreshListTask();
-        task.execute(isConnected(this));
+        // TODO: SORTING
+        if (isConnected(this)) {
+            // uncomment for setting location when sorting by distance
+            // task.setLocation(latitude, longitude)
+            task.execute(SortType.NAME);
+
+        } else {
+            Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+        }
     }
 
     @Override
@@ -76,72 +84,83 @@ public class PrinterListActivity extends ListActivity {
         super.onPause();
         Log.i("PrinterListActivity", "Calling onPause()");
     }
-    
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.printlist_menu, menu);
-		return true;
-	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		Intent intent;
-		switch (item.getItemId()) {
-		case R.id.refresh:
-            RefreshListTask task = new RefreshListTask();
-            task.execute(isConnected(this));
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.printlist_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        Intent intent;
+        switch (item.getItemId()) {
+        case R.id.refresh:
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                RefreshListTask task = new RefreshListTask();
+                task.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
             return true;
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.about:
-			showAboutDialog();
-			super.onOptionsItemSelected(item);
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-	private void showAboutDialog() {
-		showDialog(0);
-	}
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		final Dialog dialog = new Dialog(this);
-    	dialog.setContentView(R.layout.about_dialog);
-    	dialog.setTitle("About");
-    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
-    	Linkify.addLinks(tv, Linkify.ALL);
-    	tv.setMovementMethod(LinkMovementMethod.getInstance());
-		return dialog;
-	}
-	 
+        case R.id.home:
+            intent = new Intent(
+                    findViewById(android.R.id.content).getContext(),
+                    MainMenuActivity.class);
+            startActivity(intent);
+            return true;
+        case R.id.setting:
+            intent = new Intent(
+                    findViewById(android.R.id.content).getContext(),
+                    SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        case R.id.about:
+            showAboutDialog();
+            super.onOptionsItemSelected(item);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAboutDialog() {
+        showDialog(0);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.about_dialog);
+        dialog.setTitle("About");
+        TextView tv = (TextView) dialog.findViewById(R.id.about_text);
+        Linkify.addLinks(tv, Linkify.ALL);
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        return dialog;
+    }
+
     /**
      * Sets Views Should be called in UI thread
      */
-    private void setListViewData(List<ParseObject> objects) {
-    	ArrayList<Item> favs = PrinterClient.getPrinterList(this, ListType.FAVORITE, objects);
-    	ArrayList<Item> all = PrinterClient.getPrinterList(this, ListType.ALL, objects);
-    	favs.addAll(all);
-    	final ArrayList<Item> items = favs;
+    private void setListViewData(List<Printer> objects) {
+        List<Item> favs = PrinterClient.getPrinterItemList(this,
+                ListType.FAVORITE, objects);
+        List<Item> all = PrinterClient.getPrinterItemList(this,
+                ListType.ALL, objects);
+        favs.addAll(all);
+        final List<Item> items = favs;
         Log.i(TAG, new Integer(items.size()).toString());
         EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>) items);
         setListAdapter(adapter);
 
         ListView lv = getListView();
         lv.setTextFilterEnabled(true);
-        //lv.setItemsCanFocus(false);
+        // lv.setItemsCanFocus(false);
         lv.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View view,
@@ -151,7 +170,7 @@ public class PrinterListActivity extends ListActivity {
 
                 if (!items.get(position).isSection()) {
                     intent.putExtra("id",
-                            ((PrinterEntryItem) items.get(position)).parseId);
+                            ((PrinterEntryItem) items.get(position)).printerName);
                 }
 
                 startActivity(intent);
@@ -165,8 +184,10 @@ public class PrinterListActivity extends ListActivity {
      * Background task that refreshes the hashmap of printers. Modifies map.
      */
     public class RefreshListTask extends
-            AsyncTask<Boolean, byte[], List<ParseObject>> {
+            AsyncTask<SortType, byte[], List<Printer>> {
         private ProgressDialog dialog;
+        private double latitude = 0.0;
+        private double longitude = 0.0;
 
         @Override
         protected void onPreExecute() {
@@ -176,20 +197,17 @@ public class PrinterListActivity extends ListActivity {
         }
 
         @Override
-        protected List<ParseObject> doInBackground(Boolean... arg0) { // happens
-                                                                      // in
-                                                                      // background
-                                                                      // thread
-            List<ParseObject> objects = null;
-            if (arg0[0]) {
-                ParseQuery query = new ParseQuery("PrintersData");
-                try {
-                    objects = query.find();
-                } catch (ParseException e) {
-                    // swallow exception
-                    // e.printStackTrace();
-                    Log.e(TAG, "PARSE NUBFAIL in refresh list task");
-                }
+        protected List<Printer> doInBackground(SortType... arg0) { // happens
+                                                                   // in
+                                                                   // background
+                                                                   // thread
+            List<Printer> objects = null;
+            try {
+                objects = PrinterClient.getAllPrinterObjects(arg0[0],
+                        this.latitude, this.longitude);
+            } catch (PrinterClientException e) {
+                // e.printStackTrace();
+                Log.e(TAG, "PrinterClient exception in refresh list task");
             }
             return objects;
         }
@@ -200,8 +218,8 @@ public class PrinterListActivity extends ListActivity {
         }
 
         @Override
-        protected void onPostExecute(List<ParseObject> objects) { // happens in
-                                                                  // UI thread
+        protected void onPostExecute(List<Printer> objects) { // happens in
+                                                              // UI thread
             // Bad practice, but meh, it'd be better if java had tuples
             if (objects == null) {
                 Toast.makeText(getApplicationContext(),
@@ -213,6 +231,17 @@ public class PrinterListActivity extends ListActivity {
             setListViewData(objects);
 
             dialog.dismiss();
+        }
+
+        /**
+         * Called when sorting by distance
+         * 
+         * @param latitude
+         * @param longitude
+         */
+        protected void setLocation(double latitude, double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
         }
     }
 

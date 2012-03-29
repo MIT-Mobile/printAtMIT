@@ -5,15 +5,15 @@ import com.google.android.maps.OverlayItem;
 
 public class PrinterOverlayItem extends OverlayItem {
 
-    private String parseId;
+    private String printerName;
     
-    public PrinterOverlayItem(GeoPoint point, String title, String snippet, String parseId) {
+    public PrinterOverlayItem(GeoPoint point, String title, String snippet, String printerName) {
         super(point, title, snippet);
-        this.parseId = parseId;
+        this.printerName = printerName;
     }
     
     public String getParseId() {
-        return parseId;
+        return printerName;
     }
 
 }

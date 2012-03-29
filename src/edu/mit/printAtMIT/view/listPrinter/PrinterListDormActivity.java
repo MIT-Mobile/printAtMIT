@@ -27,14 +27,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.controller.client.PrinterClient;
+import edu.mit.printAtMIT.controller.client.PrinterClientException;
 import edu.mit.printAtMIT.model.printer.ListType;
+import edu.mit.printAtMIT.model.printer.Printer;
+import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
@@ -61,7 +59,14 @@ public class PrinterListDormActivity extends ListActivity {
         setContentView(R.layout.printer_list);
 
         RefreshListTask task = new RefreshListTask();
-        task.execute(isConnected(this));
+        if (isConnected(this)) {
+            // uncomment for setting location when sorting by distance
+            // task.setLocation(latitude, longitude)
+            task.execute(SortType.NAME);
+
+        } else {
+            Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+        }
     }
 
     @Override
@@ -91,7 +96,14 @@ public class PrinterListDormActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.refresh:
             RefreshListTask task = new RefreshListTask();
-            task.execute(isConnected(this));
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                task.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
             return true;
 		case R.id.home:
 			intent = new Intent(
@@ -129,9 +141,8 @@ public class PrinterListDormActivity extends ListActivity {
     /**
      * Sets Views Should be called in UI thread
      */
-    private void setListViewData(List<ParseObject> objects) {
-    	final ArrayList<Item> items = PrinterClient.getPrinterList(this, ListType.DORM, objects);
-        Log.i(TAG, new Integer(items.size()).toString());
+    private void setListViewData(List<Printer> objects) {
+    	final List<Item> items = PrinterClient.getPrinterItemList(this, ListType.DORM, objects);
         EntryAdapter adapter = new EntryAdapter(this, (ArrayList<Item>) items);
         setListAdapter(adapter);
 
@@ -147,7 +158,7 @@ public class PrinterListDormActivity extends ListActivity {
 
                 if (!items.get(position).isSection()) {
                     intent.putExtra("id",
-                            ((PrinterEntryItem) items.get(position)).parseId);
+                            ((PrinterEntryItem) items.get(position)).printerName);
                 }
 
                 startActivity(intent);
@@ -161,9 +172,11 @@ public class PrinterListDormActivity extends ListActivity {
      * Background task that refreshes the hashmap of printers. Modifies map.
      */
     public class RefreshListTask extends
-            AsyncTask<Boolean, byte[], List<ParseObject>> {
+            AsyncTask<SortType, byte[], List<Printer>> {
         private ProgressDialog dialog;
-
+        private double latitude;
+        private double longitude;
+        
         @Override
         protected void onPreExecute() {
             Log.i(TAG, "RefreshTask onPreExecute");
@@ -172,20 +185,16 @@ public class PrinterListDormActivity extends ListActivity {
         }
 
         @Override
-        protected List<ParseObject> doInBackground(Boolean... arg0) { // happens
-                                                                      // in
-                                                                      // background
-                                                                      // thread
-            List<ParseObject> objects = null;
-            if (arg0[0]) {
-                ParseQuery query = new ParseQuery("PrintersData");
-                try {
-                    objects = query.find();
-                } catch (ParseException e) {
-                    // swallow exception
-                    // e.printStackTrace();
-                    Log.e(TAG, "PARSE NUBFAIL in refresh list task");
-                }
+        protected List<Printer> doInBackground(SortType... arg0) {
+            // happens in background thread
+            
+            List<Printer> objects = null;
+            try {
+                objects = PrinterClient.getAllPrinterObjects(arg0[0],
+                        this.latitude, this.longitude);
+            } catch (PrinterClientException e) {
+                // e.printStackTrace();
+                Log.e(TAG, "PrinterClient exception in refresh list task");
             }
             return objects;
         }
@@ -196,7 +205,7 @@ public class PrinterListDormActivity extends ListActivity {
         }
 
         @Override
-        protected void onPostExecute(List<ParseObject> objects) { // happens in
+        protected void onPostExecute(List<Printer> objects) { // happens in
                                                                   // UI thread
             // Bad practice, but meh, it'd be better if java had tuples
             if (objects == null) {
@@ -209,6 +218,17 @@ public class PrinterListDormActivity extends ListActivity {
             setListViewData(objects);
 
             dialog.dismiss();
+        }
+        
+        /**
+         * Called when sorting by distance
+         * 
+         * @param latitude
+         * @param longitude
+         */
+        protected void setLocation(double latitude, double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
         }
     }
 

@@ -1,7 +1,5 @@
 package edu.mit.printAtMIT.view.listPrinter;
 
-import com.parse.Parse;
-
 import android.app.Dialog;
 import android.app.TabActivity;
 import android.content.Intent;
@@ -35,9 +33,6 @@ public class MainMenuActivity extends TabActivity{
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         Log.i("PrinterListActivity", "Calling onCreate()");
-
-        Parse.initialize(this, "KIb9mNtPKDtkDk7FJ9W6b7MiAr925a10vNuCPRer",
-                "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
 
         setContentView(R.layout.home_screen);
     	

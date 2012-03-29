@@ -98,7 +98,8 @@ public class EntryAdapter extends ArrayAdapter<Item> {
             	// set favorite state of printer
             	final PrintersDbAdapter mDbAdapter = new PrintersDbAdapter(this.context);
                 mDbAdapter.open();
-                final String id = pei.parseId;
+//                final String id = pei.parseId;
+                final String id = pei.printerName;
                 boolean favorite = mDbAdapter.isFavorite(id);
 
                 if (favorite) {

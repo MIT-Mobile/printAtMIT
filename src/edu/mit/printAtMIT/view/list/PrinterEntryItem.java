@@ -9,7 +9,6 @@ import android.util.Log;
  */
 public class PrinterEntryItem implements Item {
 
-    public final String parseId;
     public final String printerName;
     public final String location;
     public int status;
@@ -19,9 +18,8 @@ public class PrinterEntryItem implements Item {
     public static final String ERROR = "Error";
     public static final String UNKNOWN = "Unknown";
     
-    public PrinterEntryItem(String parseId, String printer, String location, int status) {
-        this.parseId = parseId;
-        this.printerName = printer;
+    public PrinterEntryItem(String printerName, String location, int status) {
+        this.printerName = printerName;
         this.location = location;
         this.status = status;
         
@@ -52,7 +50,7 @@ public class PrinterEntryItem implements Item {
             case BUSY: string = PrinterEntryItem.BUSY; break; //yellow
             case ERROR: string = PrinterEntryItem.ERROR; break; //error
             case UNKNOWN: string = PrinterEntryItem.UNKNOWN; break; //grey
-            default: Log.e("PrinterEntryItem", "Invalid printer status, thos hast problems"); break;
+            default: Log.e("PrinterEntryItem", "Invalid printer status, thou hast problems"); break;
         }
         return string;
     }
@@ -64,7 +62,7 @@ public class PrinterEntryItem implements Item {
     	case 1: return StatusType.BUSY;
     	case 2: return StatusType.ERROR;
     	case 3: return StatusType.UNKNOWN;
-    	default: Log.e("PrinterEntryItem", "Invalid printer status, thos hast problems"); break;
+    	default: Log.e("PrinterEntryItem", "Invalid printer status, thou hast problems"); break;
     	}
     	return null;
     }

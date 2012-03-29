@@ -1,7 +1,5 @@
 package edu.mit.printAtMIT;
 
-import com.parse.Parse;
-
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -28,8 +26,6 @@ public class PrintAtMITActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Parse.initialize(this, "KIb9mNtPKDtkDk7FJ9W6b7MiAr925a10vNuCPRer",
-                "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
         settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
         if (settings.getString(USERNAME, "").equals("")) {
@@ -44,8 +40,6 @@ public class PrintAtMITActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        Parse.initialize(this, "KIb9mNtPKDtkDk7FJ9W6b7MiAr925a10vNuCPRer",
-                "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
 
         if (settings.getString(USERNAME, "").equals("")) {
             startLogin();

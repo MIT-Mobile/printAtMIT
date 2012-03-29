@@ -1,17 +1,17 @@
 package edu.mit.printAtMIT.view.listPrinter;
 
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 
-
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.controller.client.PrinterClient;
+import edu.mit.printAtMIT.controller.client.PrinterClientException;
+import edu.mit.printAtMIT.model.printer.Printer;
+import edu.mit.printAtMIT.model.printer.SortType;
+import edu.mit.printAtMIT.model.printer.StatusType;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -61,8 +61,6 @@ public class PrinterMapActivity extends MapActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Parse.initialize(this, "KIb9mNtPKDtkDk7FJ9W6b7MiAr925a10vNuCPRer",
-                "dSFuQYQXSvslh9UdznzzS9Vb0kDgcKnfzgglLUHT");
         setContentView(R.layout.map);
         extras = getIntent().getExtras();
         allView = extras.getBoolean("allPrinterView", false);
@@ -72,9 +70,8 @@ public class PrinterMapActivity extends MapActivity {
 
         RefreshTask task = new RefreshTask();
         if (allView) {
-            task.execute((String)null);
-        }
-        else {
+            task.execute((String) null);
+        } else {
             task.execute(extras.getString("id"));
         }
     }
@@ -112,9 +109,8 @@ public class PrinterMapActivity extends MapActivity {
         case R.id.refresh:
             RefreshTask task = new RefreshTask();
             if (allView) {
-                task.execute((String)null);
-            }
-            else {
+                task.execute((String) null);
+            } else {
                 task.execute(extras.getString("id"));
             }
             return true;
@@ -133,36 +129,38 @@ public class PrinterMapActivity extends MapActivity {
             startActivity(intent);
             return true;
         case R.id.about:
-        	showAboutDialog();
+            showAboutDialog();
             super.onOptionsItemSelected(item);
             return true;
         case R.id.list:
             intent = new Intent(
                     findViewById(android.R.id.content).getContext(),
                     PrinterListActivity.class);
-            intent.putExtra(PrintListMenuActivity.LIST_TYPE, PrintListMenuActivity.LIST_ALL);
+            intent.putExtra(PrintListMenuActivity.LIST_TYPE,
+                    PrintListMenuActivity.LIST_ALL);
             startActivity(intent);
             return true;
         default:
             return super.onOptionsItemSelected(item);
         }
     }
-    
+
     private void showAboutDialog() {
-		showDialog(0);
-	}
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		final Dialog dialog = new Dialog(this);
-    	dialog.setContentView(R.layout.about_dialog);
-    	dialog.setTitle("About");
-    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
-    	Linkify.addLinks(tv, Linkify.ALL);
-    	tv.setMovementMethod(LinkMovementMethod.getInstance());
-		return dialog;
-	}
-	
-    private void refresh(List<ParseObject> objects) {
+        showDialog(0);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.about_dialog);
+        dialog.setTitle("About");
+        TextView tv = (TextView) dialog.findViewById(R.id.about_text);
+        Linkify.addLinks(tv, Linkify.ALL);
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        return dialog;
+    }
+
+    private void refresh(List<Printer> objects) {
         // if (allView) {
         // setPrinterList(query, null);
         // } else {
@@ -200,42 +198,45 @@ public class PrinterMapActivity extends MapActivity {
             }
             controller.setCenter(new GeoPoint(centerLat, centerLong));
 
-        }
-        else {
+        } else {
             if (objects != null && objects.size() > 0) {
-                centerLat = Integer.parseInt(objects.get(0).getString("latitude"));
-                centerLong = Integer.parseInt(objects.get(0).getString("longitude"));
+                centerLat = objects.get(0).getLatitude();
+                centerLong = objects.get(0).getLongitude();
             }
         }
         controller.setZoom(17);
         controller.animateTo(new GeoPoint(centerLat, centerLong));
 
-        Collections.sort(objects, new Comparator<ParseObject>() {
+        Collections.sort(objects, new Comparator<Printer>() {
 
-            public int compare(ParseObject obj1, ParseObject obj2) {
-                return Integer.parseInt(obj1.getString("status"))
-                        - Integer.parseInt(obj2.getString("status"));
+            // public int compare(ParseObject obj1, ParseObject obj2) {
+            // return Integer.parseInt(obj1.getString("status"))
+            // - Integer.parseInt(obj2.getString("status"));
+            // }
+
+            @Override
+            public int compare(Printer lhs, Printer rhs) {
+                // TODO Auto-generated method stub
+                return lhs.getStatus() - rhs.getStatus();
             }
 
         });
         // add printer overlayitems to map
-        for (ParseObject printer : objects) {
-            Log.i(TAG, printer.getString("status"));
-            GeoPoint point = new GeoPoint(Integer.parseInt(printer
-                    .getString("latitude")), Integer.parseInt(printer
-                    .getString("longitude")));
-
+        for (Printer printer : objects) {
+            // GeoPoint point = new GeoPoint(Integer.parseInt(printer
+            // .getString("latitude")), Integer.parseInt(printer
+            // .getString("longitude")));
+            GeoPoint point = new GeoPoint(printer.getLatitude(),
+                    printer.getLongitude());
             PrinterOverlayItem item = new PrinterOverlayItem(point,
-                    printer.getString("printerName") + " ("
-                            + printer.getString("location") + ")", "Status: "
-                            + getStatusString(Integer.parseInt(printer
-                                    .getString("status"))),
-                    printer.getObjectId());
-
-            if (printer.getString("status").equals("1")) {
+                    printer.getName() + " (" + printer.getLocation() + ")",
+                    "Status: " + getStatusString(printer.getStatus()),
+                    printer.getName());
+            StatusType status = getStatus(printer.getStatus());
+            if (status.equals(StatusType.BUSY)) {
                 drawable = this.getResources().getDrawable(
                         R.drawable.map_yellow_pin);
-            } else if (printer.getString("status").equals("2")) {
+            } else if (status.equals(StatusType.ERROR)) {
                 drawable = this.getResources().getDrawable(
                         R.drawable.map_red_pin);
             } else {
@@ -259,26 +260,45 @@ public class PrinterMapActivity extends MapActivity {
      *            : ParseQuery id: ParseId of printer, null if viewing all
      *            printers
      */
-    private List<ParseObject> getParseData(ParseQuery query, String id) {
-        List<ParseObject> objects = new ArrayList<ParseObject>();
+    private List<Printer> getData(String id) {
+        List<Printer> objects = new ArrayList<Printer>();
         if (id == null) {
             try {
-                objects = query.find();
-            } catch (ParseException e1) {
-                Log.e(TAG, "query.find() FAILED");
-            }
-        } else {
-            try {
-                objects.add(query.get(id));
-            } catch (ParseException e) {
-                Log.e(TAG, "query.get(id) FAILED");
+                objects = PrinterClient.getAllPrinterObjects(SortType.NAME, 0,
+                        0);
+            } catch (PrinterClientException e) {
+                Log.e(TAG, "getData(id==null) fail");
+                e.printStackTrace();
             }
 
+        } else {
+            try {
+                Printer printer = PrinterClient.getPrinterObject(id);
+                objects.add(printer);
+            } catch (PrinterClientException e) {
+                Log.e(TAG, "getData(id) fail");
+                e.printStackTrace();
+            }
         }
         return objects;
 
     }
 
+    private StatusType getStatus(int code) {
+        switch (code) {
+        case 0:
+            return StatusType.READY;
+        case 1:
+            return StatusType.BUSY;
+        case 2:
+            return StatusType.ERROR;
+        default:
+            Log.e(TAG, "shouldn't get here, yo");
+            break;
+        }
+        return null;
+    }
+    
     private String getStatusString(int x) {
         if (x == 0) {
             return "Ready";
@@ -314,8 +334,7 @@ public class PrinterMapActivity extends MapActivity {
     /**
      * Background task for refreshing parse data.
      */
-    public class RefreshTask extends
-            AsyncTask<String, byte[], List<ParseObject>> {
+    public class RefreshTask extends AsyncTask<String, byte[], List<Printer>> {
         private ProgressDialog dialog;
 
         @Override
@@ -331,18 +350,17 @@ public class PrinterMapActivity extends MapActivity {
         }
 
         @Override
-        protected List<ParseObject> doInBackground(String... params) {
+        protected List<Printer> doInBackground(String... params) {
             if (isConnected()) {
-                ParseQuery query = new ParseQuery("PrintersData");
-                return getParseData(query, params[0]);
+                return getData(params[0]);
             }
             return null;
         }
 
         @Override
-        protected void onPostExecute(List<ParseObject> result) {
+        protected void onPostExecute(List<Printer> result) {
             if (result == null) {
-                result = new ArrayList<ParseObject>();
+                result = new ArrayList<Printer>();
             }
             if (result.size() == 0) {
                 Toast.makeText(getApplicationContext(),
