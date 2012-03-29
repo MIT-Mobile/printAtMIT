@@ -48,17 +48,15 @@ public class EntryAdapter extends ArrayAdapter<Item> {
             } else if (i.isPrinterEntry()) {
                 PrinterEntryItem pei = (PrinterEntryItem) i;
                 
-                if (pei.location.contains("#")) {
+             
                 	v = vi.inflate(R.layout.printer_list_item_entry_long, null);
+                if (pei.location.contains("#")) {
                 	final TextView printerCommonLocation = (TextView) v
                 			.findViewById(R.id.list_item_printer_common_location);
                 	if (printerCommonLocation != null) {
                 		String commonLocation = pei.location.split("#")[1];
                 		printerCommonLocation.setText(commonLocation);
                 	}
-                }
-                else {
-                	v = vi.inflate(R.layout.printer_list_item_entry, null);
                 }
                 
                 final TextView printerName = (TextView) v

@@ -35,7 +35,7 @@ import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
-import edu.mit.printAtMIT.view.main.SettingsActivity;
+
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -90,7 +90,6 @@ public class PrinterListCampusActivity extends ListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent;
 		switch (item.getItemId()) {
 		case R.id.refresh:
             if (isConnected(this)) {
@@ -103,18 +102,6 @@ public class PrinterListCampusActivity extends ListActivity {
                 Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
             }
             return true;
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
 		case R.id.about:
 			showAboutDialog();
 			super.onOptionsItemSelected(item);

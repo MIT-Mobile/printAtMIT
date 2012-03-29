@@ -141,27 +141,14 @@ public class PrintDownloadsActivity extends FileViewActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.printmenu_menu, menu);
+		inflater.inflate(R.menu.mainmenu_menu, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent;
 		switch (item.getItemId()) {
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
 		case R.id.about:
 			showAboutDialog();
 			super.onOptionsItemSelected(item);

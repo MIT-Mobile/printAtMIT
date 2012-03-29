@@ -34,7 +34,6 @@ import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
-import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -85,53 +84,7 @@ public class PrinterListActivity extends ListActivity {
         Log.i("PrinterListActivity", "Calling onPause()");
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.printlist_menu, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        Intent intent;
-        switch (item.getItemId()) {
-        case R.id.refresh:
-            if (isConnected(this)) {
-                // uncomment for setting location when sorting by distance
-                // task.setLocation(latitude, longitude)
-                RefreshListTask task = new RefreshListTask();
-                task.execute(SortType.NAME);
-
-            } else {
-                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
-            }
-            return true;
-        case R.id.home:
-            intent = new Intent(
-                    findViewById(android.R.id.content).getContext(),
-                    MainMenuActivity.class);
-            startActivity(intent);
-            return true;
-        case R.id.setting:
-            intent = new Intent(
-                    findViewById(android.R.id.content).getContext(),
-                    SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        case R.id.about:
-            showAboutDialog();
-            super.onOptionsItemSelected(item);
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void showAboutDialog() {
-        showDialog(0);
-    }
 
     @Override
     protected Dialog onCreateDialog(int id) {
@@ -144,6 +97,40 @@ public class PrinterListActivity extends ListActivity {
         return dialog;
     }
 
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.printlist_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.refresh:
+            RefreshListTask task = new RefreshListTask();
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                task.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
+            return true;
+		case R.id.about:
+			showAboutDialog();
+			super.onOptionsItemSelected(item);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	private void showAboutDialog() {
+		showDialog(0);
+	}
+	 
     /**
      * Sets Views Should be called in UI thread
      */

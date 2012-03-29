@@ -37,7 +37,6 @@ import android.widget.Toast;
 import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.R;
 import edu.mit.printAtMIT.model.print.Lpr;
-import edu.mit.printAtMIT.view.list.ButtonItem;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
@@ -63,7 +62,6 @@ public class SettingsActivity extends ListActivity {
 	private static final int ITEM_USERNAME = 1;
 	private static final int ITEM_INKCOLOR = 3;
 	private static final int ITEM_COPIES = 4;
-	private static final int ITEM_PRINT_BUTTON = 5;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -159,7 +157,7 @@ public class SettingsActivity extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.settings_menu, menu);
+        inflater.inflate(R.menu.mainmenu_menu, menu);
         return true;
     }
     
@@ -167,10 +165,6 @@ public class SettingsActivity extends ListActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-        case R.id.home:
-        	Intent intent = new Intent(findViewById(android.R.id.content).getContext(), MainMenuActivity.class);
-        	startActivity(intent);
-            return true;
         case R.id.about:
         	showAboutDialog();
             super.onOptionsItemSelected(item);

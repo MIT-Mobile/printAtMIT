@@ -24,7 +24,6 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         
-        EditText textfield = (EditText) findViewById(R.id.entry);
         Button button01 = (Button) findViewById(R.id.continue_button);
         button01.setOnClickListener(new View.OnClickListener() {
 

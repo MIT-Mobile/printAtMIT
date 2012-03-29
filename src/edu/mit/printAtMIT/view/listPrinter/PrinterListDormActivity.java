@@ -8,7 +8,6 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -22,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,8 +34,6 @@ import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
-import edu.mit.printAtMIT.view.main.SettingsActivity;
-import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -92,7 +88,6 @@ public class PrinterListDormActivity extends ListActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-		Intent intent;
 		switch (item.getItemId()) {
 		case R.id.refresh:
             RefreshListTask task = new RefreshListTask();
@@ -105,18 +100,6 @@ public class PrinterListDormActivity extends ListActivity {
                 Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
             }
             return true;
-		case R.id.home:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					MainMenuActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.setting:
-			intent = new Intent(
-					findViewById(android.R.id.content).getContext(),
-					SettingsActivity.class);
-			startActivity(intent);
-			return true;
 		case R.id.about:
 			showAboutDialog();
 			super.onOptionsItemSelected(item);

@@ -126,46 +126,36 @@ public class PrinterInfoActivity extends MapActivity {
 
     }
 
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.printlist_menu, menu);
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        Intent intent;
-        switch (item.getItemId()) {
-        case R.id.refresh:
-            RefreshTask task = new RefreshTask();
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selections
+		switch (item.getItemId()) {
+		case R.id.refresh:
+			RefreshTask task = new RefreshTask();
             task.execute();
             return true;
-        case R.id.home:
-            intent = new Intent(
-                    findViewById(android.R.id.content).getContext(),
-                    MainMenuActivity.class);
-            startActivity(intent);
-            return true;
-        case R.id.setting:
-            intent = new Intent(
-                    findViewById(android.R.id.content).getContext(),
-                    SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        case R.id.about:
-            showAboutDialog();
-            super.onOptionsItemSelected(item);
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
+		case R.id.about:
+			showAboutDialog();
+			super.onOptionsItemSelected(item);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
-    private void showAboutDialog() {
-        showDialog(0);
-    }
+	private void showAboutDialog() {
+		showDialog(0);
+	}
+
+
 
     @Override
     protected Dialog onCreateDialog(int id) {
