@@ -22,26 +22,26 @@ public class LoginActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
+        setContentView(R.layout.touchstone_login);
         
-        Button button01 = (Button) findViewById(R.id.continue_button);
-        button01.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-            	EditText textfield = (EditText) findViewById(R.id.entry);
-            	if (!textfield.getText().toString().equals("")) {
-	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
-	                SharedPreferences.Editor editor = userSettings.edit();
-	                editor.putString(PrintAtMITActivity.USERNAME, textfield.getText().toString());
-	                editor.putString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE);
-	                editor.putInt(PrintAtMITActivity.COPIES, 1);
-	                
-	                // Commit the edits!
-	                editor.commit();
-	            	Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
-	            	startActivity(intent);
-            	}
-            }
-        });
+//        Button button01 = (Button) findViewById(R.id.continue_button);
+//        button01.setOnClickListener(new View.OnClickListener() {
+//
+//            public void onClick(View view) {
+//            	EditText textfield = (EditText) findViewById(R.id.entry);
+//            	if (!textfield.getText().toString().equals("")) {
+//	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+//	                SharedPreferences.Editor editor = userSettings.edit();
+//	                editor.putString(PrintAtMITActivity.USERNAME, textfield.getText().toString());
+//	                editor.putString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE);
+//	                editor.putInt(PrintAtMITActivity.COPIES, 1);
+//	                
+//	                // Commit the edits!
+//	                editor.commit();
+//	            	Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
+//	            	startActivity(intent);
+//            	}
+//            }
+//        });
     }
 }
