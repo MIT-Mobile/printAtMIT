@@ -49,11 +49,15 @@ public class PrinterListDormActivity extends ListActivity {
 //    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
 //    private static final int REFRESH_ID = Menu.FIRST;
 
+    private ProgressDialog mProgressDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
-
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setMessage("Loading Printer Data");
         RefreshListTask task = new RefreshListTask();
         if (isConnected(this)) {
             // uncomment for setting location when sorting by distance
@@ -94,6 +98,7 @@ public class PrinterListDormActivity extends ListActivity {
             if (isConnected(this)) {
                 // uncomment for setting location when sorting by distance
                 // task.setLocation(latitude, longitude)
+                mProgressDialog.setMessage("Refreshing Printer Data");
                 task.execute(SortType.NAME);
 
             } else {
@@ -156,15 +161,14 @@ public class PrinterListDormActivity extends ListActivity {
      */
     public class RefreshListTask extends
             AsyncTask<SortType, byte[], List<Printer>> {
-        private ProgressDialog dialog;
         private double latitude;
         private double longitude;
         
         @Override
         protected void onPreExecute() {
             Log.i(TAG, "RefreshTask onPreExecute");
-            dialog = ProgressDialog.show(PrinterListDormActivity.this, "",
-                    "Refreshing Data", true);
+            mProgressDialog.show();
+
         }
 
         @Override
@@ -200,7 +204,7 @@ public class PrinterListDormActivity extends ListActivity {
             }
             setListViewData(objects);
 
-            dialog.dismiss();
+            mProgressDialog.dismiss();
         }
         
         /**

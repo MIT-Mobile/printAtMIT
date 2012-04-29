@@ -51,12 +51,18 @@ public class PrinterListCampusActivity extends ListActivity {
 //    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
 //    private static final int REFRESH_ID = Menu.FIRST;
 
+    //progress dialog for refreshing
+    private ProgressDialog mProgressDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
 
         RefreshListTask task = new RefreshListTask();
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setMessage("Loading Printer Data");
         if (isConnected(this)) {
             // uncomment for setting location when sorting by distance
             // task.setLocation(latitude, longitude)
@@ -96,6 +102,7 @@ public class PrinterListCampusActivity extends ListActivity {
                 // uncomment for setting location when sorting by distance
                 // task.setLocation(latitude, longitude)
                 RefreshListTask task = new RefreshListTask();
+                mProgressDialog.setMessage("Refreshing Printer Data");
                 task.execute(SortType.NAME);
 
             } else {
@@ -153,20 +160,19 @@ public class PrinterListCampusActivity extends ListActivity {
         Log.i(TAG, "end of fillListData()");
     }
 
+
     /**
      * Background task that refreshes the hashmap of printers. Modifies map.
      */
     public class RefreshListTask extends
             AsyncTask<SortType, byte[], List<Printer>> {
-        private ProgressDialog dialog;
         private double latitude = 0.0;
         private double longitude = 0.0;
 
         @Override
         protected void onPreExecute() {
             Log.i(TAG, "RefreshTask onPreExecute");
-            dialog = ProgressDialog.show(PrinterListCampusActivity.this, "",
-                    "Refreshing Data", true);
+            mProgressDialog.show();
         }
 
         @Override
@@ -203,7 +209,7 @@ public class PrinterListCampusActivity extends ListActivity {
             }
             setListViewData(objects);
 
-            dialog.dismiss();
+            mProgressDialog.dismiss();
         }
         
         /**
@@ -218,6 +224,7 @@ public class PrinterListCampusActivity extends ListActivity {
         }
     }
 
+    
     /**
      * Checks to see if user is connected to wifi or 3g
      * 

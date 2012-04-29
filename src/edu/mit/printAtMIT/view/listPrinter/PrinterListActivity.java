@@ -54,16 +54,20 @@ public class PrinterListActivity extends ListActivity {
     public static final int CAMPUS_PRINTERS = 1;
     public static final int DORM_PRINTERS = 2;
 
+    private ProgressDialog mProgressDialog;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
-
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setMessage("Loading Printer Data");
         RefreshListTask task = new RefreshListTask();
         // TODO: SORTING
         if (isConnected(this)) {
             // uncomment for setting location when sorting by distance
-            // task.setLocation(latitude, longitude)
+//             task.setLocation(latitude, longitude)
             task.execute(SortType.NAME);
 
         } else {
@@ -113,6 +117,7 @@ public class PrinterListActivity extends ListActivity {
             if (isConnected(this)) {
                 // uncomment for setting location when sorting by distance
                 // task.setLocation(latitude, longitude)
+                mProgressDialog.setMessage("Refreshing Printer Data");
                 task.execute(SortType.NAME);
 
             } else {
@@ -168,32 +173,29 @@ public class PrinterListActivity extends ListActivity {
     }
 
     /**
-     * Background task that refreshes the hashmap of printers. Modifies map.
+     * Background task that refreshes printer info
      */
     public class RefreshListTask extends
             AsyncTask<SortType, byte[], List<Printer>> {
-        private ProgressDialog dialog;
         private double latitude = 0.0;
         private double longitude = 0.0;
 
         @Override
         protected void onPreExecute() {
             Log.i(TAG, "RefreshTask onPreExecute");
-            dialog = ProgressDialog.show(PrinterListActivity.this, "",
-                    "Refreshing Data", true);
+            mProgressDialog.show();
         }
 
+        //happens in background thread
         @Override
-        protected List<Printer> doInBackground(SortType... arg0) { // happens
-                                                                   // in
-                                                                   // background
-                                                                   // thread
+        protected List<Printer> doInBackground(SortType... arg0) {
             List<Printer> objects = null;
             try {
                 objects = PrinterClient.getAllPrinterObjects(arg0[0],
                         this.latitude, this.longitude);
             } catch (PrinterClientException e) {
                 // e.printStackTrace();
+               
                 Log.e(TAG, "PrinterClient exception in refresh list task");
             }
             return objects;
@@ -217,7 +219,7 @@ public class PrinterListActivity extends ListActivity {
             }
             setListViewData(objects);
 
-            dialog.dismiss();
+            mProgressDialog.dismiss();
         }
 
         /**
