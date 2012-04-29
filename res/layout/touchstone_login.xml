@@ -5,31 +5,31 @@
                 android:orientation="vertical"
                 android:background="@color/background">
 
-    <View android:id="@+id/helper3" 
+    <View android:id="@+id/helper1" 
         	android:background="@color/red"
 			android:layout_width="fill_parent"
 			android:layout_height="12dp" 
 	/>
     
-     <View android:id="@+id/helper2" 
+     <View android:id="@+id/helper1" 
          	android:layout_alignParentBottom="true"
         	android:background="@color/red"
 			android:layout_width="fill_parent"
 			android:layout_height="12dp" 
 	/>
-    
-    <View android:id="@+id/helper1" 
+
+     <View android:id="@+id/helper1" 
 			android:layout_width="0dp"
 			android:layout_height="0dp" 
 			android:layout_centerHorizontal="true" 
 			android:layout_centerVertical="true"
-	/>
-    <!-- Password -->
+	/>  		
+		<!-- Password -->
 		<EditText 
 			android:id="@+id/touchstonePassword"
 	        android:singleLine="true" 
 	        android:lines="1"
-	        android:hint="@string/password"
+	        android:hint="Password"
 	        android:password="true"
 	        android:layout_above="@id/helper1"
 	        android:layout_width="200dp" 
@@ -45,7 +45,7 @@
 			android:id="@+id/touchstoneUsername"
 	       	android:singleLine="true" 
 	       	android:lines="1"
-	       	android:hint="@string/username"
+	       	android:hint="Username or Email"
 	       	android:layout_width="200dp" 
               android:layout_height="wrap_content" 
               android:layout_above="@id/touchstonePassword"
@@ -56,12 +56,11 @@
               android:layout_marginTop="5dp"/>	
 		<ImageView 
 	   android:id="@+id/logo"
-	   android:src="@drawable/blurb"
+	   android:src="@drawable/login_blurb"
 	   android:layout_above="@id/touchstoneUsername"
 	   android:layout_width="wrap_content"
 	   android:layout_height="wrap_content"
 	   android:layout_centerHorizontal="true" 
-	   android:contentDescription="@string/blurb"
 	   />
 			
 		<Button 
@@ -74,8 +73,6 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="65dp" >
 		</Button>
-		
-		
-
+    
    	
 </RelativeLayout>
