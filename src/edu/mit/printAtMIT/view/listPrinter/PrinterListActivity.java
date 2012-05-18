@@ -49,7 +49,7 @@ public class PrinterListActivity extends ListActivity {
     // private static final String REFRESH_ERROR =
     // "Error connecting to network, please try again later";
     // private static final int REFRESH_ID = Menu.FIRST;
-
+    
     public static final int ALL_PRINTERS = 0;
     public static final int CAMPUS_PRINTERS = 1;
     public static final int DORM_PRINTERS = 2;
@@ -128,6 +128,42 @@ public class PrinterListActivity extends ListActivity {
 			showAboutDialog();
 			super.onOptionsItemSelected(item);
 			return true;
+		case R.id.name_sort:
+            RefreshListTask task1 = new RefreshListTask();
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task1.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }		    
+		    return true;
+		case R.id.building_sort:
+            RefreshListTask task2 = new RefreshListTask();
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task2.execute(SortType.BUILDING);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
+		    return true;
+		case R.id.location_sort:
+            RefreshListTask task3 = new RefreshListTask();
+            if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task3.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
+		    return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

@@ -35,39 +35,35 @@ import edu.mit.printAtMIT.view.list.PrinterEntryItem;
 import edu.mit.printAtMIT.view.list.SectionItem;
 
 public class PrinterClient {
+    public static final String TAG = "PRINTERCLIENT";
     public static final String ALL_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%d&longitude=%d";
     public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";
 
-    /**
-     * Returns a list of printers of type ListType as Item objects, ready to be
-     * added to the view
-     * 
-     * @param context
-     *            , Context of the activity calling the method
-     * @param type
-     *            , type of printer list requested (all, campus, dorm)
-     * @param objects
-     *            , list of Parse Objects
-     * @return ArrayList of Items
-     */
-    // public static ArrayList<Item> getPrinterList(Context context,
-    // ListType type, List<ParseObject> objects) {
-    // PrinterList printerList = new PrinterList(context, type);
-    // return printerList.getList(objects);
-    // }
 
+    /**
+     * @param context
+     *      context where list is to be rendered
+     * @param type
+     * @param objects
+     *      printer objects retrieved from the server
+     * @return
+     *      a list of Item to be used for setting list layout
+     */
     public static List<Item> getPrinterItemList(Context context, ListType type,
             List<Printer> objects) {
         HashMap<String, PrinterEntryItem> curr_map = new HashMap<String, PrinterEntryItem>();
         HashMap<String, PrinterEntryItem> all_map = new HashMap<String, PrinterEntryItem>();
-
-        if (objects != null) {
+        ArrayList<Item> itemsList = new ArrayList<Item>();
+        if (objects != null && objects.size() > 0) {
+//            Collections.sort(objects, new PrinterComparator());
             curr_map = new HashMap<String, PrinterEntryItem>();
             all_map = new HashMap<String, PrinterEntryItem>();
+            String currSectHeader = "";
             for (Printer o : objects) {
+                Log.i(TAG, o.getSectionHeader());
                 // COMMON NAME
                 StringBuilder location = new StringBuilder(o.getLocation());
                 if (o.getBuilding() != null && o.getBuilding().length() != 0) {
@@ -79,22 +75,60 @@ public class PrinterClient {
                 if (type == ListType.ALL) {
                     PrinterEntryItem item = new PrinterEntryItem(o.getName(),
                             location.toString(), o.getStatus());
+                    if (!currSectHeader.equals(o.getSectionHeader())) {
+
+                        // TODO
+                        // different section header ui?
+                        itemsList.add(new SectionItem(o.getSectionHeader()));
+                        currSectHeader = o.getSectionHeader();
+                    }
+                    itemsList.add(item);
                     curr_map.put(o.getName(), item);
                 } else if (type == ListType.DORM) {
                     if (o.atResidence()) {
                         PrinterEntryItem item = new PrinterEntryItem(
                                 o.getName(), location.toString(), o.getStatus());
+                        if (!currSectHeader.equals(o.getSectionHeader())) {
+
+                            // TODO
+                            // different section header ui?
+                            itemsList
+                                    .add(new SectionItem(o.getSectionHeader()));
+                            currSectHeader = o.getSectionHeader();
+                        }
+                        itemsList.add(item);
+
                         curr_map.put(o.getName(), item);
                     }
                 } else if (type == ListType.CAMPUS) {
                     if (!o.atResidence()) {
                         PrinterEntryItem item = new PrinterEntryItem(
                                 o.getName(), location.toString(), o.getStatus());
+
+                        if (!currSectHeader.equals(o.getSectionHeader())) {
+
+                            // TODO
+                            // different section header ui?
+                            itemsList
+                                    .add(new SectionItem(o.getSectionHeader()));
+                            currSectHeader = o.getSectionHeader();
+                        }
+                        itemsList.add(item);
+
                         curr_map.put(o.getName(), item);
                     }
                 } else {
                     PrinterEntryItem item = new PrinterEntryItem(o.getName(),
                             location.toString(), o.getStatus());
+                    if (!currSectHeader.equals(o.getSectionHeader())) {
+
+                        // TODO
+                        // different section header ui?
+                        itemsList.add(new SectionItem(o.getSectionHeader()));
+                        currSectHeader = o.getSectionHeader();
+                    }
+                    itemsList.add(item);
+
                     curr_map.put(o.getName(), item);
                 }
             }
@@ -104,12 +138,12 @@ public class PrinterClient {
         }
 
         final ArrayList<Item> items = new ArrayList<Item>();
-        ArrayList<PrinterEntryItem> printers = null;
+        ArrayList<Item> printers = null;
         if (type == ListType.FAVORITE) {
             PrintersDbAdapter mDbAdapter = new PrintersDbAdapter(context);
             mDbAdapter.open();
             List<String> ids = mDbAdapter.getFavorites();
-            printers = new ArrayList<PrinterEntryItem>();
+            printers = new ArrayList<Item>();
             for (String id : ids) {
                 if (all_map.containsKey(id)) {
                     printers.add(all_map.get(id));
@@ -118,7 +152,8 @@ public class PrinterClient {
             mDbAdapter.close();
 
         } else {
-            printers = new ArrayList<PrinterEntryItem>(curr_map.values());
+            // printers = new ArrayList<PrinterEntryItem>(curr_map.values());
+            printers = itemsList;
 
         }
 
@@ -151,7 +186,7 @@ public class PrinterClient {
             }
         }
 
-        for (PrinterEntryItem item : printers) {
+        for (Item item : printers) {
             items.add(item);
         }
 
@@ -261,8 +296,7 @@ public class PrinterClient {
                         object.getString("location"),
                         object.getString("building_name"),
                         object.getBoolean("atResidence"),
-                        object.getInt("status"), 
-                        object.getInt("latitude"),
+                        object.getInt("status"), object.getInt("latitude"),
                         object.getInt("longitude"),
                         object.getDouble("distance"));
             } else {
