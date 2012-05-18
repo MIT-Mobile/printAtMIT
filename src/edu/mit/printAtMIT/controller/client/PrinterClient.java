@@ -38,6 +38,8 @@ public class PrinterClient {
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";
+
+
     /**
      * @param context
      *      context where list is to be rendered

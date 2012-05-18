@@ -147,6 +147,8 @@ public class PrinterListActivity extends ListActivity implements LocationListene
 		case R.id.name_sort:
             RefreshListTask task1 = new RefreshListTask();
             if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
                 task1.execute(SortType.NAME);
 
@@ -157,6 +159,8 @@ public class PrinterListActivity extends ListActivity implements LocationListene
 		case R.id.building_sort:
             RefreshListTask task2 = new RefreshListTask();
             if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
                 task2.execute(SortType.BUILDING);
 
@@ -165,12 +169,12 @@ public class PrinterListActivity extends ListActivity implements LocationListene
             }
 		    return true;
 		case R.id.location_sort:
-		    Log.i(TAG, "getting location");
             RefreshListTask task3 = new RefreshListTask();
             if (isConnected(this)) {
+                // uncomment for setting location when sorting by distance
+                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
-                task3.execute(SortType.DISTANCE);
-
+                task3.execute(SortType.NAME);
             } else {
                 Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
             }
