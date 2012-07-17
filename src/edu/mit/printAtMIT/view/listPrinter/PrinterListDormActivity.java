@@ -8,6 +8,9 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -34,6 +37,7 @@ import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.PrinterEntryItem;
+import edu.mit.printAtMIT.view.listPrinter.PrinterListCampusActivity.RefreshListTask;
 
 /**
  * Lists all the printers from database. Shows name, location, status from each
@@ -44,24 +48,34 @@ import edu.mit.printAtMIT.view.list.PrinterEntryItem;
  * Context Menu Items: Favorite, Info, MapView
  */
 
-public class PrinterListDormActivity extends ListActivity {
+public class PrinterListDormActivity extends ListActivity implements LocationListener {
     public static final String TAG = "PrinterListActivity";
 //    private static final String REFRESH_ERROR = "Error connecting to network, please try again later";
 //    private static final int REFRESH_ID = Menu.FIRST;
 
     private ProgressDialog mProgressDialog;
+    private LocationManager mlocationManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
+        mlocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (mlocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            mlocationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 20 * 1000, 10, this);
+        }
+        if (mlocationManager
+                .isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            mlocationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, 2*1000, 10, this);
+        }
+        
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setMessage("Loading Printer Data");
         RefreshListTask task = new RefreshListTask();
         if (isConnected(this)) {
-            // uncomment for setting location when sorting by distance
-            // task.setLocation(latitude, longitude)
             task.execute(SortType.NAME);
 
         } else {
@@ -72,14 +86,14 @@ public class PrinterListDormActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("PrinterListActivity", "Calling onResume()");
-
+        mlocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 20*1000, 10, this);
+        mlocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2*1000, 10, this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i("PrinterListActivity", "Calling onPause()");
+        mlocationManager.removeUpdates(this);
     }
     
     @Override
@@ -109,6 +123,37 @@ public class PrinterListDormActivity extends ListActivity {
 			showAboutDialog();
 			super.onOptionsItemSelected(item);
 			return true;
+		case R.id.name_sort:
+            RefreshListTask task1 = new RefreshListTask();
+            if (isConnected(this)) {
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task1.execute(SortType.NAME);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }           
+            return true;
+        case R.id.building_sort:
+            RefreshListTask task2 = new RefreshListTask();
+            if (isConnected(this)) {
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task2.execute(SortType.BUILDING);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
+            return true;
+        case R.id.location_sort:
+            Log.i(TAG, "getting location");
+            RefreshListTask task3 = new RefreshListTask();
+            if (isConnected(this)) {
+                mProgressDialog.setMessage("Refreshing Printer Data");
+                task3.execute(SortType.DISTANCE);
+
+            } else {
+                Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
+            }
+            return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -177,6 +222,17 @@ public class PrinterListDormActivity extends ListActivity {
             
             List<Printer> objects = null;
             try {
+                //get gps coords
+                if (arg0[0].equals(SortType.DISTANCE)) {
+                    Location loc = mlocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                    if (loc == null) {
+                        loc = mlocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+                    latitude = loc.getLatitude();
+                    longitude = loc.getLongitude();
+                    Log.i("COORDINATES ", latitude + ", " + longitude);
+                }
                 objects = PrinterClient.getAllPrinterObjects(arg0[0],
                         this.latitude, this.longitude);
             } catch (PrinterClientException e) {
@@ -213,10 +269,10 @@ public class PrinterListDormActivity extends ListActivity {
          * @param latitude
          * @param longitude
          */
-        protected void setLocation(double latitude, double longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
+//        protected void setLocation(double latitude, double longitude) {
+//            this.latitude = latitude;
+//            this.longitude = longitude;
+//        }
     }
 
     /**
@@ -239,5 +295,29 @@ public class PrinterListDormActivity extends ListActivity {
             }
         }
         return networkInfo == null ? false : networkInfo.isConnected();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+        
     }
 }

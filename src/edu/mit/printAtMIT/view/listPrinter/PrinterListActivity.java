@@ -8,6 +8,9 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -44,7 +47,7 @@ import edu.mit.printAtMIT.view.list.PrinterEntryItem;
  * Context Menu Items: Favorite, Info, MapView
  */
 
-public class PrinterListActivity extends ListActivity {
+public class PrinterListActivity extends ListActivity implements LocationListener{
     public static final String TAG = "PrinterListActivity";
     // private static final String REFRESH_ERROR =
     // "Error connecting to network, please try again later";
@@ -53,6 +56,7 @@ public class PrinterListActivity extends ListActivity {
     public static final int ALL_PRINTERS = 0;
     public static final int CAMPUS_PRINTERS = 1;
     public static final int DORM_PRINTERS = 2;
+    private LocationManager mlocationManager;
 
     private ProgressDialog mProgressDialog;
     
@@ -60,6 +64,16 @@ public class PrinterListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.printer_list);
+        mlocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (mlocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            mlocationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 20 * 1000, 10, this);
+        }
+        if (mlocationManager
+                .isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            mlocationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER, 2*1000, 10, this);
+        }
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setMessage("Loading Printer Data");
@@ -78,14 +92,16 @@ public class PrinterListActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("PrinterListActivity", "Calling onResume()");
+        mlocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 20*1000, 10, this);
+        mlocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2*1000, 10, this);
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i("PrinterListActivity", "Calling onPause()");
+        mlocationManager.removeUpdates(this);
+
     }
 
 
@@ -131,8 +147,6 @@ public class PrinterListActivity extends ListActivity {
 		case R.id.name_sort:
             RefreshListTask task1 = new RefreshListTask();
             if (isConnected(this)) {
-                // uncomment for setting location when sorting by distance
-                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
                 task1.execute(SortType.NAME);
 
@@ -143,8 +157,6 @@ public class PrinterListActivity extends ListActivity {
 		case R.id.building_sort:
             RefreshListTask task2 = new RefreshListTask();
             if (isConnected(this)) {
-                // uncomment for setting location when sorting by distance
-                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
                 task2.execute(SortType.BUILDING);
 
@@ -153,12 +165,11 @@ public class PrinterListActivity extends ListActivity {
             }
 		    return true;
 		case R.id.location_sort:
+		    Log.i(TAG, "getting location");
             RefreshListTask task3 = new RefreshListTask();
             if (isConnected(this)) {
-                // uncomment for setting location when sorting by distance
-                // task.setLocation(latitude, longitude)
                 mProgressDialog.setMessage("Refreshing Printer Data");
-                task3.execute(SortType.NAME);
+                task3.execute(SortType.DISTANCE);
 
             } else {
                 Toast.makeText(this, "Internet Error", Toast.LENGTH_SHORT);
@@ -218,8 +229,8 @@ public class PrinterListActivity extends ListActivity {
 
         @Override
         protected void onPreExecute() {
-            Log.i(TAG, "RefreshTask onPreExecute");
             mProgressDialog.show();
+            
         }
 
         //happens in background thread
@@ -227,6 +238,17 @@ public class PrinterListActivity extends ListActivity {
         protected List<Printer> doInBackground(SortType... arg0) {
             List<Printer> objects = null;
             try {
+                //get gps coords
+                if (arg0[0].equals(SortType.DISTANCE)) {
+                    Location loc = mlocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                    if (loc == null) {
+                        loc = mlocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    }
+                    latitude = loc.getLatitude();
+                    longitude = loc.getLongitude();
+                    Log.i("COORDINATES ", latitude + ", " + longitude);
+                }
                 objects = PrinterClient.getAllPrinterObjects(arg0[0],
                         this.latitude, this.longitude);
             } catch (PrinterClientException e) {
@@ -264,10 +286,10 @@ public class PrinterListActivity extends ListActivity {
          * @param latitude
          * @param longitude
          */
-        protected void setLocation(double latitude, double longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
+//        protected void setLocation(double latitude, double longitude) {
+//            this.latitude = latitude;
+//            this.longitude = longitude;
+//        }
     }
 
     /**
@@ -290,5 +312,29 @@ public class PrinterListActivity extends ListActivity {
             }
         }
         return networkInfo == null ? false : networkInfo.isConnected();
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO Auto-generated method stub
+        
     }
 }

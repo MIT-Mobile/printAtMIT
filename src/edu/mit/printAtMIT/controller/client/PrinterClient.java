@@ -36,8 +36,12 @@ import edu.mit.printAtMIT.view.list.SectionItem;
 
 public class PrinterClient {
     public static final String TAG = "PRINTERCLIENT";
-    public static final String ALL_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%d&longitude=%d";
-    public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
+    //public static final String ALL_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%f&longitude=%f";
+    public static final String ALL_URL = "http://mobile-print-dev.mit.edu:8080/query_result/?sort=%s&latitude=%f&longitude=%f";
+
+    //public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
+    public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu:8080/query_result/?printer_query=%s";
+
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";
@@ -235,10 +239,10 @@ public class PrinterClient {
         String uri = "";
         switch (sorttype) {
         case NAME:
-            uri = String.format(ALL_URL, "name", 0, 0);
+            uri = String.format(ALL_URL, "name", (float)0, (float)0);
             break;
         case BUILDING:
-            uri = String.format(ALL_URL, "building", 0, 0);
+            uri = String.format(ALL_URL, "building", (float)0, (float)0);
             break;
         case DISTANCE:
             uri = String.format(ALL_URL, "distance", latitude, longitude);
