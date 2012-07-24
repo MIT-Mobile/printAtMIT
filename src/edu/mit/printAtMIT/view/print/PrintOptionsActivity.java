@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
+import com.lowagie.text.pdf.PdfWriter;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -31,6 +38,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
@@ -60,471 +68,511 @@ import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**
- * User selects print options:
- *      bw/color
- *      copies
- * Print button
+ * User selects print options: bw/color copies Print button
  * 
- * Menu Items:
- *      Settings
- *      About     
+ * Menu Items: Settings About
  */
 
 public class PrintOptionsActivity extends ListActivity {
+    public static final String TAG = "PrintOptionsActivity";
     private String fileLoc;
     private String fileName;
     private String queue;
     private String userName;
     private int numCopies;
-    
+
     private static final String FILE = "FILE";
     private static final String IMAGE = "IMAGE";
     private static final String WEB = "WEB";
     private String type = FILE;
 
-    //public static Button btnStart;
-    
     private static final String hostName = "mitprint.mit.edu";
-    
+
     ArrayList<Item> items = new ArrayList<Item>();
-	private static final int ITEM_FILENAME = 1;
-	private static final int ITEM_USERNAME = 3;
-	private static final int ITEM_INKCOLOR = 5;
-	private static final int ITEM_COPIES = 6;
-	private String getImageFile(Uri imageUri){
-		String[] projection = { MediaStore.Images.Media.DATA };
-		Cursor cursor = managedQuery( imageUri, projection, null, null, null );
-		int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-		cursor.moveToFirst();
-		fileLoc =  cursor.getString(column_index);
-		return fileLoc;
-	}
+    private static final int ITEM_FILENAME = 1;
+    private static final int ITEM_USERNAME = 3;
+    private static final int ITEM_INKCOLOR = 5;
+    private static final int ITEM_COPIES = 6;
+
+    private String getImageFile(Uri imageUri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(imageUri, projection, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        fileLoc = cursor.getString(column_index);
+        return fileLoc;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.print_options);
-        
+
         Button btnStart = (Button) findViewById(R.id.print_button);
 
         btnStart.setOnClickListener(new View.OnClickListener() {
- 			
- 			
- 			public void onClick(View v) {
- 				ConvertAndPrintTask printTask = new ConvertAndPrintTask();
-                 printTask.execute();
- 				
- 			}
- 		});
-        
+
+            public void onClick(View v) {
+                ConvertAndPrintTask printTask = new ConvertAndPrintTask();
+                printTask.execute();
+
+            }
+        });
+
         Intent i = getIntent();
         // when called from opening a file or image outside of app (view intent)
         Uri data = i.getData();
         if (data != null) {
-        	String scheme = data.getScheme();
-        	
-        	// opening an image that's in gallery or previewing from gmail
-        	if (scheme.equals("content")){
-        	    if (data.getHost().equals("gmail-ls")){
-        	        Log.d("PrintOptionsActivity", "gmail preview - don't do anything");
-        	        Toast.makeText(this, "Please download item to device before printing", Toast.LENGTH_SHORT).show();
-        	    }
-        	    if (data.getHost().equals("media")){
-        	        fileLoc = getImageFile(data);
-        	        File f = new File(fileLoc);
-        	        fileName = f.getName();
-        	        type = IMAGE;
-        	    }
-        	}
-        	// opening a file or image not in gallery (ex: downloaded from gmail)
-        	if (scheme.equals("file")){
-        		File f = new File(data.getPath());
-        		fileLoc = f.getPath().toString();
-        		fileName = f.getName();
-        		
-        		// must be an image
-                if (!(fileName.endsWith(".pdf") || fileName.endsWith(".ps") || fileName.endsWith(".txt")))
-                    type = IMAGE;
-        	}
-        }
-    	// gotten from send (share) intent or print activity
-        else {
-        	// get url from sharing web page (send intent)
-        	Bundle extras = i.getExtras();
-        	String url = extras.getString("android.intent.extra.TEXT");
-        	
-        	// Get filepath from uri from sharing image (send intent)
-        	Uri imageUri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
-        	if (imageUri != null){
-        		fileLoc = getImageFile(imageUri);
-        		File f = new File(fileLoc);
-        		fileName = f.getName();
-        		type = IMAGE;
-        	}
-        	
-        	// if not a shared web page
-        	if (url == null) {
-           		// gotten from print activity - pdf, ps, or txt. 
-       			fileName = (fileName == null) ? extras.getString("fileName"): fileName;
-       			fileLoc = (fileLoc == null) ? extras.getString("fileLoc") : fileLoc;
+            String scheme = data.getScheme();
 
-           		// gotten from print activity or send intent - image files, need to be converted
-       			if (!(fileName.endsWith(".pdf") || fileName.endsWith(".ps") || fileName.endsWith(".txt"))){
-       				type = IMAGE;
-           		}
-           	}
-           	else{
-           		fileLoc = url;
-           		fileName = url;
-           		type = WEB;
-           	}
+            // opening an image that's in gallery or previewing from gmail
+            if (scheme.equals("content")) {
+                if (data.getHost().equals("gmail-ls")) {
+                    Log.d("PrintOptionsActivity",
+                            "gmail preview - don't do anything");
+                    Toast.makeText(this,
+                            "Please download item to device before printing",
+                            Toast.LENGTH_SHORT).show();
+                }
+                if (data.getHost().equals("media")) {
+                    fileLoc = getImageFile(data);
+                    File f = new File(fileLoc);
+                    fileName = f.getName();
+                    type = IMAGE;
+                }
+            }
+            // opening a file or image not in gallery (ex: downloaded from
+            // gmail)
+            if (scheme.equals("file")) {
+                File f = new File(data.getPath());
+                fileLoc = f.getPath().toString();
+                fileName = f.getName();
+
+                // must be an image
+                if (!(fileName.endsWith(".pdf") || fileName.endsWith(".ps") || fileName
+                        .endsWith(".txt")))
+                    type = IMAGE;
+            }
         }
-        
-        SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+        // gotten from send (share) intent or print activity
+        else {
+            // get url from sharing web page (send intent)
+            Bundle extras = i.getExtras();
+            String url = extras.getString("android.intent.extra.TEXT");
+
+            // Get filepath from uri from sharing image (send intent)
+            Uri imageUri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
+            if (imageUri != null) {
+                fileLoc = getImageFile(imageUri);
+                File f = new File(fileLoc);
+                fileName = f.getName();
+                type = IMAGE;
+            }
+
+            // if not a shared web page
+            if (url == null) {
+                // gotten from print activity - pdf, ps, or txt.
+                fileName = (fileName == null) ? extras.getString("fileName")
+                        : fileName;
+                fileLoc = (fileLoc == null) ? extras.getString("fileLoc")
+                        : fileLoc;
+
+                // gotten from print activity or send intent - image files, need
+                // to be converted
+                if (!(fileName.endsWith(".pdf") || fileName.endsWith(".ps") || fileName
+                        .endsWith(".txt"))) {
+                    type = IMAGE;
+                }
+            } else {
+                fileLoc = url;
+                fileName = url;
+                type = WEB;
+            }
+        }
+
+        SharedPreferences userSettings = getSharedPreferences(
+                PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
         userName = userSettings.getString(PrintAtMITActivity.USERNAME, "");
         numCopies = userSettings.getInt(PrintAtMITActivity.COPIES, 1);
-        if (userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE).equals("Color"))
-        	queue = "color";
+        if (userSettings.getString(PrintAtMITActivity.INKCOLOR,
+                PrintAtMITActivity.BLACKWHITE).equals("Color"))
+            queue = "color";
         else
-        	queue = "bw";
+            queue = "bw";
 
         items.add(new SectionItem("File name"));
         items.add(new EntryItem(fileName, fileLoc, ITEM_FILENAME));
         items.add(new SectionItem("Kerberos Id"));
-        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(PrintAtMITActivity.USERNAME, ""), ITEM_USERNAME));
+        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(
+                PrintAtMITActivity.USERNAME, ""), ITEM_USERNAME));
         items.add(new SectionItem("Printer Preferences"));
-        items.add(new EntryItem("Ink Color", userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE), ITEM_INKCOLOR));
-        items.add(new EntryItem("Copies", ""+userSettings.getInt(PrintAtMITActivity.COPIES, 1), ITEM_COPIES));
-        
-        EntryAdapter adapter = new EntryAdapter(this, items);
-        
-        setListAdapter(adapter);
-        
-        Button settingsButton = (Button) findViewById(R.id.settings_icon);
-    	Button listButton = (Button) findViewById(R.id.list_icon);
-    	Button printButton = (Button) findViewById(R.id.printer_icon);
-    	
-    	printButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(v.getContext(),
-						PrintMenuActivity.class);
-				startActivity(intent);
-			}
-		});
-		settingsButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(v.getContext(),
-						SettingsActivity.class);
-				startActivity(intent);
-			}
-		});
-    	
-    	listButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(v.getContext(),
-						MainMenuActivity.class);
-				startActivity(intent);
-			}
-		});
-    }
-    
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.mainmenu_menu, menu);
-		return true;
-	}
+        items.add(new EntryItem("Ink Color", userSettings.getString(
+                PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE),
+                ITEM_INKCOLOR));
+        items.add(new EntryItem("Copies", ""
+                + userSettings.getInt(PrintAtMITActivity.COPIES, 1),
+                ITEM_COPIES));
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.about:
-			showAboutDialog();
-			super.onOptionsItemSelected(item);
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
-    
-	private void showAboutDialog() {
-		showDialog(0);
-	}
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		final Dialog dialog = new Dialog(this);
-    	dialog.setContentView(R.layout.about_dialog);
-    	dialog.setTitle("About");
-    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
-    	Linkify.addLinks(tv, Linkify.ALL);
-    	tv.setMovementMethod(LinkMovementMethod.getInstance());
-		return dialog;
-	}
+        EntryAdapter adapter = new EntryAdapter(this, items);
+
+        setListAdapter(adapter);
+
+        Button settingsButton = (Button) findViewById(R.id.settings_icon);
+        Button listButton = (Button) findViewById(R.id.list_icon);
+        Button printButton = (Button) findViewById(R.id.printer_icon);
+
+        printButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(),
+                        PrintMenuActivity.class);
+                startActivity(intent);
+            }
+        });
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(),
+                        SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        listButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(),
+                        MainMenuActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
     @Override
-    public void onConfigurationChanged(Configuration newConfig){
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainmenu_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+        case R.id.about:
+            showAboutDialog();
+            super.onOptionsItemSelected(item);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAboutDialog() {
+        showDialog(0);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.about_dialog);
+        dialog.setTitle("About");
+        TextView tv = (TextView) dialog.findViewById(R.id.about_text);
+        Linkify.addLinks(tv, Linkify.ALL);
+        tv.setMovementMethod(LinkMovementMethod.getInstance());
+        return dialog;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
-    
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenuInfo menuInfo) {
-      super.onCreateContextMenu(menu, v, menuInfo);
-      menu.setHeaderTitle("Ink Color Settings");
-      MenuInflater inflater = getMenuInflater();
-      inflater.inflate(R.menu.inkcolor_menu, menu);
-      //checks the correct option based on saved user preference
-      //default is black and white
-	    SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
-	    String color = userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE);
-	    if (color.equals(PrintAtMITActivity.COLOR)) {
-	    	MenuItem item = (MenuItem) menu.findItem(R.id.color);
-	    	item.setChecked(true);
-	    }
-	    else {
-	    	MenuItem item = (MenuItem) menu.findItem(R.id.bw);
-	    	item.setChecked(true);
-	    }
+            ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.setHeaderTitle("Ink Color Settings");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.inkcolor_menu, menu);
+        // checks the correct option based on saved user preference
+        // default is black and white
+        SharedPreferences userSettings = getSharedPreferences(
+                PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+        String color = userSettings.getString(PrintAtMITActivity.INKCOLOR,
+                PrintAtMITActivity.BLACKWHITE);
+        if (color.equals(PrintAtMITActivity.COLOR)) {
+            MenuItem item = (MenuItem) menu.findItem(R.id.color);
+            item.setChecked(true);
+        } else {
+            MenuItem item = (MenuItem) menu.findItem(R.id.bw);
+            item.setChecked(true);
+        }
     }
-    
+
     @Override
-    public boolean onContextItemSelected(MenuItem item)
-    {
-    	EntryAdapter adapter;
-    	//changes user preference based on what user has selected
-       switch(item.getItemId())
-       {
-       case R.id.bw:
-    	   queue = "bw";
-    	   items.set(ITEM_INKCOLOR, new EntryItem("Ink Color", PrintAtMITActivity.BLACKWHITE, ITEM_INKCOLOR));
-           adapter = new EntryAdapter(this, items);
-           setListAdapter(adapter);
-          return true;
-       case R.id.color:
-    	  queue = "color";
-          items.set(ITEM_INKCOLOR, new EntryItem("Ink Color", PrintAtMITActivity.COLOR, ITEM_INKCOLOR));
-          adapter = new EntryAdapter(this, items);
-          setListAdapter(adapter);
-          return true;
-       default:
-          return super.onContextItemSelected(item);
-       }
+    public boolean onContextItemSelected(MenuItem item) {
+        EntryAdapter adapter;
+        // changes user preference based on what user has selected
+        switch (item.getItemId()) {
+        case R.id.bw:
+            queue = "bw";
+            items.set(ITEM_INKCOLOR, new EntryItem("Ink Color",
+                    PrintAtMITActivity.BLACKWHITE, ITEM_INKCOLOR));
+            adapter = new EntryAdapter(this, items);
+            setListAdapter(adapter);
+            return true;
+        case R.id.color:
+            queue = "color";
+            items.set(ITEM_INKCOLOR, new EntryItem("Ink Color",
+                    PrintAtMITActivity.COLOR, ITEM_INKCOLOR));
+            adapter = new EntryAdapter(this, items);
+            setListAdapter(adapter);
+            return true;
+        default:
+            return super.onContextItemSelected(item);
+        }
     }
-    
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-    	if(!items.get(position).isSection()){
-    		switch(position) {
-    		//popup dialog appears for username
-    		//saves user-inputted username
-    		case ITEM_USERNAME:
-    			final Dialog dialog = new Dialog(this);
+        if (!items.get(position).isSection()) {
+            switch (position) {
+            // popup dialog appears for username
+            // saves user-inputted username
+            case ITEM_USERNAME:
+                final Dialog dialog = new Dialog(this);
 
-    			dialog.setContentView(R.layout.username_dialog);
-    			dialog.setTitle("Change Kerberos Id");
-    			dialog.show();
-    			
-    			Button saveButton = (Button) dialog.findViewById(R.id.save);
-    			EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
-    			textfield.setImeOptions(EditorInfo.IME_ACTION_DONE);
-    	        
-    	        saveButton.setOnClickListener(new View.OnClickListener() {
+                dialog.setContentView(R.layout.username_dialog);
+                dialog.setTitle("Change Kerberos Id");
+                dialog.show();
 
-    	            public void onClick(View view) {
-    	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
-    	            	EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
-    	            	SharedPreferences.Editor editor = userSettings.edit();
-    	                editor.putString(PrintAtMITActivity.USERNAME, textfield.getText().toString());
-    	                userName = textfield.getText().toString();
-    	                editor.commit();
-    	      
-    	                items.set(ITEM_USERNAME, new EntryItem("Change Kerberos Id", textfield.getText().toString(), ITEM_USERNAME));
-    	                EntryAdapter adapter = new EntryAdapter(view.getContext(), items);
-    	                setListAdapter(adapter);
-    	                dialog.dismiss();
-    	            }
-    	        });
-    	        
-        		return;
-    		case ITEM_FILENAME:
-/*    			final Dialog fileDialog = new Dialog(this);
+                Button saveButton = (Button) dialog.findViewById(R.id.save);
+                EditText textfield = (EditText) dialog
+                        .findViewById(R.id.change_username);
+                textfield.setImeOptions(EditorInfo.IME_ACTION_DONE);
 
-    			fileDialog.setContentView(R.layout.about_dialog);
-    			fileDialog.setTitle(fileName);
-    			TextView filename = (TextView) fileDialog.findViewById(R.id.about_text);
-    			filename.setText(fileLoc);
-    			fileDialog.show();
-    	        */
-        		return;
-        	//context menu appears for ink color
-    		case ITEM_INKCOLOR: 
-    			registerForContextMenu( v ); 
-    		    v.setLongClickable(false); 
-    		    this.openContextMenu(v);
-    		   
-    			break;
-    		case ITEM_COPIES:
-    			// dialog pops up for copy number
-    			final View view = v;
+                saveButton.setOnClickListener(new View.OnClickListener() {
 
-    			final SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
-    		  
-    			final EditText copy = new EditText(this);
-    			copy.setInputType(InputType.TYPE_CLASS_NUMBER);
-              
-    			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-      		  	builder.setMessage("Number of copies:")
-      		  			.setCancelable(false)
-	        	        .setView(copy)
-	        	        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-	        	        	public void onClick(DialogInterface dialog, int id) {	        	        		
-	        	    			int copies = userSettings.getInt(PrintAtMITActivity.COPIES, 1);
-	        	    			String text = copy.getText().toString();
-	        	        		copies = (text.equals("") || text.equals("0")) ? copies : Integer.parseInt(copy.getText().toString());
-	        	       	      	numCopies = copies;
-	        	       	      	
-	         	                items.set(ITEM_COPIES, new EntryItem("Copies", "" + copies, ITEM_COPIES));
-	
-	         	                EntryAdapter adapter = new EntryAdapter(view.getContext(), items);
-	         	                setListAdapter(adapter);
-	         	                
-	         	                dialog.dismiss();
-	        	             }
-	        	         })
-	        	         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-	        	             public void onClick(DialogInterface dialog, int id) {
-	        	                  dialog.cancel();
-	        	             }
-	        	         });
-      		  	AlertDialog alert = builder.create();
-	        	alert.show();
-	        	
-	        	// have soft keyboard automatically show up
-				alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                    public void onClick(View view) {
+                        SharedPreferences userSettings = getSharedPreferences(
+                                PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+                        EditText textfield = (EditText) dialog
+                                .findViewById(R.id.change_username);
+                        SharedPreferences.Editor editor = userSettings.edit();
+                        editor.putString(PrintAtMITActivity.USERNAME, textfield
+                                .getText().toString());
+                        userName = textfield.getText().toString();
+                        editor.commit();
 
-	        	break;
-    		default: Toast.makeText(this, "herp derp", Toast.LENGTH_SHORT).show(); break;
-    		}
-    		
-    	}
-    	
-    	super.onListItemClick(l, v, position, id);
+                        items.set(ITEM_USERNAME, new EntryItem(
+                                "Change Kerberos Id", textfield.getText()
+                                        .toString(), ITEM_USERNAME));
+                        EntryAdapter adapter = new EntryAdapter(view
+                                .getContext(), items);
+                        setListAdapter(adapter);
+                        dialog.dismiss();
+                    }
+                });
+
+                return;
+            case ITEM_FILENAME:
+                /*
+                 * final Dialog fileDialog = new Dialog(this);
+                 * 
+                 * fileDialog.setContentView(R.layout.about_dialog);
+                 * fileDialog.setTitle(fileName); TextView filename = (TextView)
+                 * fileDialog.findViewById(R.id.about_text);
+                 * filename.setText(fileLoc); fileDialog.show();
+                 */
+                return;
+                // context menu appears for ink color
+            case ITEM_INKCOLOR:
+                registerForContextMenu(v);
+                v.setLongClickable(false);
+                this.openContextMenu(v);
+
+                break;
+            case ITEM_COPIES:
+                // dialog pops up for copy number
+                final View view = v;
+
+                final SharedPreferences userSettings = getSharedPreferences(
+                        PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+
+                final EditText copy = new EditText(this);
+                copy.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(
+                        v.getContext());
+                builder.setMessage("Number of copies:")
+                        .setCancelable(false)
+                        .setView(copy)
+                        .setPositiveButton("Save",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                            int id) {
+                                        int copies = userSettings.getInt(
+                                                PrintAtMITActivity.COPIES, 1);
+                                        String text = copy.getText().toString();
+                                        copies = (text.equals("") || text
+                                                .equals("0")) ? copies
+                                                : Integer.parseInt(copy
+                                                        .getText().toString());
+                                        numCopies = copies;
+
+                                        items.set(ITEM_COPIES, new EntryItem(
+                                                "Copies", "" + copies,
+                                                ITEM_COPIES));
+
+                                        EntryAdapter adapter = new EntryAdapter(
+                                                view.getContext(), items);
+                                        setListAdapter(adapter);
+
+                                        dialog.dismiss();
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                            int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+                // have soft keyboard automatically show up
+                alert.getWindow()
+                        .setSoftInputMode(
+                                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+                break;
+            default:
+                Toast.makeText(this, "herp derp", Toast.LENGTH_SHORT).show();
+                break;
+            }
+
+        }
+
+        super.onListItemClick(l, v, position, id);
     }
-    
+
     public class ConvertAndPrintTask extends AsyncTask<Void, Void, Boolean> {
-    	private ProgressDialog dialog;
-    	private boolean error = false;
+        private ProgressDialog dialog;
+        private boolean error = false;
 
         @Override
         protected void onPreExecute() {
             Log.i("AsyncTask", "onPreExecute");
-            dialog = ProgressDialog.show(PrintOptionsActivity.this, "", 
+            dialog = ProgressDialog.show(PrintOptionsActivity.this, "",
                     "Sending print job...", true);
         }
-        
-    	private String convertImage(String imgLoc){
-        	try {
-        		Log.d("PDF", "starting converting");
-                HttpClient client = new DefaultHttpClient();  
-                String  postURL = "http://sedris.mit.edu/print.php?filename=" + fileName;
-                HttpPost post = new HttpPost(postURL); 
-                
-                File sendFile = new File(imgLoc);
-                FileEntity reqEntity = new FileEntity(sendFile, "binary/octet-stream");
-                post.setEntity(reqEntity);
-      
-                HttpResponse responsePOST = client.execute(post);
-                HttpEntity resEntity = responsePOST.getEntity();  
-                InputStream inputStream = resEntity.getContent();
-                String intStorageDirectory = getFilesDir().toString();
-                File f = new File(intStorageDirectory, "printAtMIT.pdf");
-                
-            	OutputStream out = new FileOutputStream(f);
 
-            	int read = 0;
-            	byte[] bytes = new byte[1024];
-             
-            	while ((read = inputStream.read(bytes)) != -1) {
-            		out.write(bytes, 0, read);
-            	}
-             
-            	inputStream.close();
-            	out.flush();
-            	out.close();
-            } catch (Exception  e) {
-            	Log.i("ConvertAndPrintTask", "Error converting image");
+        private String convertImage(String imgLoc) {
+            Log.i(TAG, "starting image converting");
+            Log.i(TAG, "imgLoc: " + imgLoc);
+            String intStorageDirectory = getFilesDir().toString();
+            File f = new File(intStorageDirectory, "printAtMIT.pdf");
+            Document document = new Document();
+
+            try {
+                Image jpg = Image.getInstance(imgLoc);
+                Log.i(TAG, "height: " + jpg.getHeight());
+                Log.i(TAG, "width: " + jpg.getWidth());
+
+                // create a writer that listens to the document and directs a
+                // PDF-stream to a file
+                FileOutputStream fos = new FileOutputStream(f);
+                PdfWriter.getInstance(document, fos);
+                document.open();
+
+                // scale image to fit pdf page
+                jpg.scalePercent((document.right() - document.left())
+                        / jpg.getWidth() * 100);
+                document.add(jpg);
+
+            } catch (BadElementException e) {
+                e.printStackTrace();
+                error = true;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                error = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                error = true;
+            } catch (DocumentException e) {
                 e.printStackTrace();
                 error = true;
             }
+            document.close();
+            Log.i(TAG, "finished converting image");
+            return f.getPath();
+        }
 
-            String intStorageDirectory = getFilesDir().toString();
-            File f = new File(intStorageDirectory, "printAtMIT.pdf");
-    		return f.getPath();
-    	}
-    	
-    	private String convertUrl (String url){
-        	try {
-                HttpClient client = new DefaultHttpClient();  
-                String  postURL = "http://pdfmyurl.com";
-                HttpPost post = new HttpPost(postURL); 
+        private String convertUrl(String url) {
+            try {
+                HttpClient client = new DefaultHttpClient();
+                String postURL = "http://pdfmyurl.com";
+                HttpPost post = new HttpPost(postURL);
                 List<NameValuePair> pairs = new ArrayList<NameValuePair>();
                 pairs.add(new BasicNameValuePair("url", url));
                 pairs.add(new BasicNameValuePair("-O", "Portrait"));
-                UrlEncodedFormEntity ent = new UrlEncodedFormEntity(pairs,HTTP.UTF_8);
+                UrlEncodedFormEntity ent = new UrlEncodedFormEntity(pairs,
+                        HTTP.UTF_8);
                 post.setEntity(ent);
-                HttpResponse responsePOST = client.execute(post);  
-                HttpEntity resEntity = responsePOST.getEntity();  
-                
+                HttpResponse responsePOST = client.execute(post);
+                HttpEntity resEntity = responsePOST.getEntity();
+
                 InputStream inputStream = resEntity.getContent();
                 String intStorageDirectory = getFilesDir().toString();
                 File f = new File(intStorageDirectory, "printAtMIT.pdf");
 
-            	OutputStream out = new FileOutputStream(f);
+                OutputStream out = new FileOutputStream(f);
 
-            	int read = 0;
-            	byte[] bytes = new byte[1024];
-             
-            	while ((read = inputStream.read(bytes)) != -1) {
-            		out.write(bytes, 0, read);
-            	}
-             
-            	inputStream.close();
-            	out.flush();
-            	out.close();
-            	
-                
-            } catch (Exception  e) {
-            	Log.i("ConvertAndPrintTask", "Error converting url");
+                int read = 0;
+                byte[] bytes = new byte[1024];
+
+                while ((read = inputStream.read(bytes)) != -1) {
+                    out.write(bytes, 0, read);
+                }
+
+                inputStream.close();
+                out.flush();
+                out.close();
+
+            } catch (Exception e) {
+                Log.i("ConvertAndPrintTask", "Error converting url");
                 e.printStackTrace();
                 error = true;
             }
-        	
+
             String intStorageDirectory = getFilesDir().toString();
             File f = new File(intStorageDirectory, "printAtMIT.pdf");
-    		return f.getPath();
-    	}
+            return f.getPath();
+        }
+
         @Override
-        protected Boolean doInBackground(Void... params) { //This runs on a different thread
-			if (type == IMAGE){
-        		File imgFile = new File(fileLoc);
-        		fileName = imgFile.getName();
-        		fileLoc = convertImage(fileLoc);
-			}
-			if (type == WEB){
-				fileName = fileLoc;
-           		fileLoc = convertUrl(fileLoc);
-			}
-            
+        protected Boolean doInBackground(Void... params) { // This runs on a
+                                                           // different thread
+            if (type == IMAGE) {
+                File imgFile = new File(fileLoc);
+                fileName = imgFile.getName();
+                fileLoc = convertImage(fileLoc);
+            }
+            if (type == WEB) {
+                fileName = fileLoc;
+                fileLoc = convertUrl(fileLoc);
+            }
+
             Lpr lpr = new Lpr();
             try {
-            	File f = new File(fileLoc);
+                File f = new File(fileLoc);
                 lpr.printFile(f, userName, hostName, queue, fileName, numCopies);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();      
+                e.printStackTrace();
                 Log.i("ConvertAndPrintTask", "doInBackground: IOException");
                 error = true;
             } catch (InterruptedException e) {
@@ -535,25 +583,29 @@ public class PrintOptionsActivity extends ListActivity {
             }
             return error;
         }
-        
+
         @Override
         protected void onCancelled() {
             Log.i("ConvertAndPrintTask", "Cancelled.");
         }
+
         @Override
         protected void onPostExecute(Boolean result) {
-        	dialog.dismiss();
+            dialog.dismiss();
             String intStorageDirectory = getFilesDir().toString();
             File f = new File(intStorageDirectory, "printAtMIT.pdf");
             f.delete();
-            
+
             if (result) {
-            	finish();
-                Toast.makeText(getApplicationContext(), "Error sending, try again", Toast.LENGTH_SHORT).show();
-                Log.i("ConvertAndPrintTask", "onPostExecute: Completed with an Error.");
+                finish();
+                Toast.makeText(getApplicationContext(),
+                        "Error sending, try again", Toast.LENGTH_SHORT).show();
+                Log.i("ConvertAndPrintTask",
+                        "onPostExecute: Completed with an Error.");
             } else {
-            	finish();
-                Toast.makeText(getApplicationContext(), "Successfully sent", Toast.LENGTH_SHORT).show();
+                finish();
+                Toast.makeText(getApplicationContext(), "Successfully sent",
+                        Toast.LENGTH_SHORT).show();
                 Log.i("ConvertAndPrintTask", "onPostExecute: Completed.");
             }
         }
