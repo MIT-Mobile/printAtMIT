@@ -65,7 +65,6 @@ import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
-import edu.mit.printAtMIT.view.login.MITClient;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**
@@ -205,7 +204,7 @@ public class PrintOptionsActivity extends ListActivity {
         items.add(new SectionItem("File name"));
         items.add(new EntryItem(fileName, fileLoc, ITEM_FILENAME));
         items.add(new SectionItem("Kerberos Id"));
-        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(MITClient.TOUCHSTONE_USERNAME, ""), ITEM_USERNAME));
+        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(PrintAtMITActivity.TOUCHSTONE_USERNAME, ""), ITEM_USERNAME));
         items.add(new SectionItem("Printer Preferences"));
         items.add(new EntryItem("Ink Color", userSettings.getString(
                 PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE),
@@ -337,7 +336,6 @@ public class PrintOptionsActivity extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-<<<<<<< HEAD
         if (!items.get(position).isSection()) {
             switch (position) {
             // popup dialog appears for username
@@ -458,7 +456,6 @@ public class PrintOptionsActivity extends ListActivity {
         }
 
         super.onListItemClick(l, v, position, id);
-=======
     	if(!items.get(position).isSection()){
     		switch(position) {
     		//popup dialog appears for username
@@ -555,7 +552,6 @@ public class PrintOptionsActivity extends ListActivity {
     	}
     	
     	super.onListItemClick(l, v, position, id);
->>>>>>> Enabled Touchstone login for phone log-in.
     }
 
     public class ConvertAndPrintTask extends AsyncTask<Void, Void, Boolean> {

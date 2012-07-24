@@ -55,7 +55,6 @@ public class PrinterClient {
         HashMap<String, PrinterEntryItem> all_map = new HashMap<String, PrinterEntryItem>();
         ArrayList<Item> itemsList = new ArrayList<Item>();
         if (objects != null && objects.size() > 0) {
-//            Collections.sort(objects, new PrinterComparator());
             curr_map = new HashMap<String, PrinterEntryItem>();
             all_map = new HashMap<String, PrinterEntryItem>();
             String currSectHeader = "";
@@ -228,6 +227,7 @@ public class PrinterClient {
             double latitude, double longitude) throws URISyntaxException,
             ClientProtocolException, IOException, JSONException {
         String uri = "";
+
         switch (sorttype) {
         case NAME:
             uri = String.format(ALL_URL, "name", (float)0, (float)0);

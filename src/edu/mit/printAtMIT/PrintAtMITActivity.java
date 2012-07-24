@@ -38,7 +38,8 @@ public class PrintAtMITActivity extends Activity {
     public static HttpClient HTTP_CLIENT;                     // Singleton to store session after logging in. USE FOR ALL HTTP REQUESTS
     private static SharedPreferences settings;
     private static final String TAG = "PrintAtMITActivity";
-    
+    public static final String TOUCHSTONE_USERNAME = "TOUCHSTONE_USERNAME";
+	public static final String TOUCHSTONE_PASSWORD = "TOUCHSTONE_PASSWORD";
 
     /** Called when the activity is first created. */
     @Override
@@ -46,7 +47,7 @@ public class PrintAtMITActivity extends Activity {
         super.onCreate(savedInstanceState);
         settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         Log.d(TAG, "testing");
-        if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null || settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
+        if (settings.getString(PrintAtMITActivity.TOUCHSTONE_USERNAME, null) == null || settings.getString(PrintAtMITActivity.TOUCHSTONE_USERNAME, null).equals("")) {
             startLogin();
         } else {
         	Intent intent = new Intent(this, MainMenuActivity.class);
@@ -59,7 +60,7 @@ public class PrintAtMITActivity extends Activity {
     public void onResume() {
         super.onResume();
 
-        if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null || settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
+        if (settings.getString(PrintAtMITActivity.TOUCHSTONE_USERNAME, null) == null || settings.getString(PrintAtMITActivity.TOUCHSTONE_USERNAME, null).equals("")) {
             startLogin();
         } else {
         	Intent intent = new Intent(this, MainMenuActivity.class);
@@ -70,22 +71,6 @@ public class PrintAtMITActivity extends Activity {
     private void startLogin() {
 
         setContentView(R.layout.login);
-
-        final Bundle extras = getIntent().getExtras();
-
-        if (extras != null && extras.getString("error") != null) {
-        	String error = extras.getString("error");
-        	String text = "";
-        	if (error.equals(MITClient.NO_INPUT_ERROR_STATE)) {
-        		text = "Please enter username and password";
-	        	
-        	}
-        	else if (error.equals(MITClient.AUTH_ERROR_STATE)) {
-        		text = "Incorrect username and password";
-        	}
-        	Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-        	toast.show();
-        }
         Button button01 = (Button) findViewById(R.id.touchstoneLoginButton);
         EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
         
@@ -94,7 +79,7 @@ public class PrintAtMITActivity extends Activity {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-					login(extras, v);
+					login(v);
 					return true;
 				}
 				return false;
@@ -103,12 +88,12 @@ public class PrintAtMITActivity extends Activity {
         button01.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-            	login(extras, view);
+            	login(view);
             }
         });
     }
 
-    private void login(Bundle extras, View view) {
+    private void login(View view) {
     	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
         EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
         
