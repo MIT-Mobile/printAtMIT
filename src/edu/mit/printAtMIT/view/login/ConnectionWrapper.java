@@ -2,6 +2,7 @@ package edu.mit.printAtMIT.view.login;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -75,7 +76,7 @@ public class ConnectionWrapper {
 				return false;
 			}
 		}
-		
+		final ArrayList<Boolean> temp = new ArrayList<Boolean>();
 		// we want to insure any response/error is posted back
 		// on the same thread as openURL was initiated
 		
@@ -84,10 +85,10 @@ public class ConnectionWrapper {
 		// (since the thread probably does not block anything else)
 		//if(Looper.myLooper() != null) {
 		//	Log.d(TAG, "asyonchronous");
-			asynchronous(url, new Handler() {
+			asynchronous(url, temp, new Handler() {
 				@Override
 				public void handleMessage(Message msg) {
-					Log.d(TAG,"openURL - asynchronous");
+					Log.d(TAG,"handling message");
 
 					if(msg.arg1 == CONNECTION_ERROR) {
 						Log.d(TAG,"CONNECTION ERROR");
@@ -107,12 +108,11 @@ public class ConnectionWrapper {
 			 synchronous(url , callback);
 			Log.d(TAG,"openURL - synchronous");
 		}*/
-		
-		return true;
+		return temp.get(0);
 	}
 	
 	public HttpResponse httpClientResponse(HttpGet httpGet) throws ClientProtocolException, IOException {
-		Log.d(TAG,"httpClientResponse from MITConnectionWrapper");
+		Log.d(TAG,"httpClientResponse from ConnectionWrapper");
 		MITClient mitClient = new MITClient(mContext);
 		mitClient.setState(MITClient.WAYF_STATE);
 		HttpResponse response = null;
@@ -125,7 +125,7 @@ public class ConnectionWrapper {
 			//Log.d(TAG,"response = " + response);
 		}
 		catch (Exception e) {
-			Log.d(TAG,e.getStackTrace().toString());
+			Log.e(TAG, "exception", e);
 			//Log.d(TAG,e.getMessage());
 		}
 		return response;
@@ -145,20 +145,22 @@ public class ConnectionWrapper {
 //		}
 //	}
 	
-	private void asynchronous(final String url, final Handler threadHandler) {
-		new Thread() {
+	private void asynchronous(final String url, final ArrayList<Boolean> temp, final Handler threadHandler) {
+		temp.clear();
+		Thread thread = new Thread() {
 			@Override
 			public void run() {
 				Log.d(TAG,"asynchronous url = " + url);
 				Message message = Message.obtain();
 				
 				HttpGet httpGet = new HttpGet(url);
+				// wayf.mit.edu shire=https%3A%2F%2Fm.mit.edu%2FShibboleth.sso%2FSAML%2FPOST&time=1335730770&target=cookie%3Ab303acca&providerId=https%3A%2F%2Fm.mit.edu%2Fshibboleth
 				httpGet.setHeader("User-Agent", HTTP_USER_AGENT);
 				try {
 					//HttpResponse response = httpClient.execute(httpGet);
 					HttpResponse response = httpClientResponse(httpGet);
 					//Log.d(TAG,"response = " + response);
-					//Log.d(TAG,"status code = " + response.getStatusLine().getStatusCode());
+					// Log.d(TAG,"status code = " + response.getStatusLine().getStatusCode());
 					//Log.d(TAG,"url = " + httpGet.getURI().toURL().toString());
 					if (response != null) {
 						Log.d(TAG,"response not null");
@@ -166,24 +168,35 @@ public class ConnectionWrapper {
 						if(response.getStatusLine().getStatusCode() == 200) {
 							InputStream stream = response.getEntity().getContent();
 							message.arg1 = CONNECTION_RESPONSE;
-							message.obj = stream;						
+							message.obj = stream;	
+							temp.add(0, true);
+							
 						} else {
 							Log.d(TAG,"status code before error = " + response.getStatusLine().getStatusCode());
 							message.arg1 = CONNECTION_ERROR;
 							message.obj = ErrorType.Server;
+							temp.add(0, false);
 						}
 					}
 					else {
-						//Log.d(TAG,"response is null");
+						Log.d(TAG,"response is null");
+						temp.add(0, false);
 					}
 				} catch (IOException e) {
 					message.arg1 = CONNECTION_ERROR;
 					message.obj = ErrorType.Network;
+					Log.e(TAG, "exception", e);
 				}
-				
 				threadHandler.sendMessage(message);
 			}
-		}.start();
+		};
+		thread.start();
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static void synchronous(final String url /*, final ConnectionInterface callback*/) {

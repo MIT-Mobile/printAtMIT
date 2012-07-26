@@ -57,6 +57,7 @@ import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
+import edu.mit.printAtMIT.view.login.MITClient;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**
@@ -191,7 +192,7 @@ public class PrintOptionsActivity extends ListActivity {
         items.add(new SectionItem("File name"));
         items.add(new EntryItem(fileName, fileLoc, ITEM_FILENAME));
         items.add(new SectionItem("Kerberos Id"));
-        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(PrintAtMITActivity.USERNAME, ""), ITEM_USERNAME));
+        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(MITClient.TOUCHSTONE_USERNAME, ""), ITEM_USERNAME));
         items.add(new SectionItem("Printer Preferences"));
         items.add(new EntryItem("Ink Color", userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE), ITEM_INKCOLOR));
         items.add(new EntryItem("Copies", ""+userSettings.getInt(PrintAtMITActivity.COPIES, 1), ITEM_COPIES));
@@ -337,7 +338,7 @@ public class PrintOptionsActivity extends ListActivity {
     	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
     	            	EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
     	            	SharedPreferences.Editor editor = userSettings.edit();
-    	                editor.putString(PrintAtMITActivity.USERNAME, textfield.getText().toString());
+    	                editor.putString(MITClient.TOUCHSTONE_USERNAME, textfield.getText().toString());
     	                userName = textfield.getText().toString();
     	                editor.commit();
     	      

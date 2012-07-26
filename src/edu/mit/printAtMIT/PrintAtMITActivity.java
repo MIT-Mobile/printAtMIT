@@ -16,9 +16,11 @@ import edu.mit.printAtMIT.view.login.MITClient;
 import edu.mit.printAtMIT.view.login.MITConnectionWrapper;
 import edu.mit.printAtMIT.view.login.MobileWebApi.HttpClientType;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,7 +48,7 @@ public class PrintAtMITActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null) {
+        if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null || settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
             startLogin();
         } else {
         	Intent intent = new Intent(this, MainMenuActivity.class);
@@ -59,7 +61,7 @@ public class PrintAtMITActivity extends Activity {
     public void onResume() {
         super.onResume();
 
-        if (settings.getString(USERNAME, null) == null) {
+        if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null || settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
             startLogin();
         } else {
         	Intent intent = new Intent(this, MainMenuActivity.class);
@@ -75,32 +77,65 @@ public class PrintAtMITActivity extends Activity {
 
         if (extras != null && extras.getString("error") != null) {
         	String error = extras.getString("error");
-        	if (error.equals(PrintAtMITActivity.NO_DATA_ENTRY)) {
-        		String text = "Please enter username and password";
-	        	Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
-	        	toast.show();
+        	String text = "";
+        	if (error.equals(MITClient.NO_INPUT_ERROR_STATE)) {
+        		text = "Please enter username and password";
+	        	
         	}
+        	else if (error.equals(MITClient.AUTH_ERROR_STATE)) {
+        		text = "Incorrect username and password";
+        	}
+        	Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+        	toast.show();
         }
         Button button01 = (Button) findViewById(R.id.touchstoneLoginButton);
+        EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
+        
+        touchstonePassword.setOnKeyListener(new View.OnKeyListener() {
+			
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+					ProgressDialog progress = ProgressDialog.show(v.getContext(), "", "Logging in...");
+					login(extras, v);
+					progress.cancel();
+					return true;
+				}
+				return false;
+			}
+		});
         button01.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-            	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
-                EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
-                
-            	SharedPreferences.Editor prefsEditor = settings.edit();
-            	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, touchstoneUsername.getText().toString());
-            	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, touchstonePassword.getText().toString());
-            	prefsEditor.commit();
-            	
-            	if (extras != null) {
-            		String requestKey = extras.getString("requestKey");
-            		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
-    				clientData.setTouchstoneState(MITClient.TOUCHSTONE_LOGIN);
-            	}
-            	ConnectionWrapper connection = new ConnectionWrapper(view.getContext());
-                // TODO add error handling
-            	boolean isStarted = connection.openURL("wayf.mit.edu");
+            	ProgressDialog progress = ProgressDialog.show(view.getContext(), "", "Logging in...");
+            	login(extras, view);
+            	progress.cancel();
+//            	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
+//                EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
+//                
+//            	SharedPreferences.Editor prefsEditor = settings.edit();
+//            	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, touchstoneUsername.getText().toString());
+//            	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, touchstonePassword.getText().toString());
+//            	prefsEditor.commit();
+//            	
+//            	if (extras != null) {
+//            		String requestKey = extras.getString("requestKey");
+//            		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
+//    				clientData.setTouchstoneState(MITClient.TOUCHSTONE_LOGIN);
+//            	}
+//            	ConnectionWrapper connection = new ConnectionWrapper(view.getContext());
+//                // TODO add error handling
+//            	long time = System.currentTimeMillis();
+//            	// String URL = "https://wayf.mit.edu/WAYF?shire=https%3A%2F%2Fm.mit.edu%2FShibboleth.sso%2FSAML%2FPOST&time="+time+"&target=cookie%3Ab303acca&providerId=https%3A%2F%2Fm.mit.edu%2Fshibboleth";
+//            	String URL = "http://m.mit.edu/api/?command=loans&module=libraries";
+//            	//String URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=name";
+//            	boolean isStarted = connection.openURL(URL);
+//            	
+//            	if (isStarted && settings.getString(MITClient.TOUCHSTONE_USERNAME, null) != null && !settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
+//            		Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
+//                	startActivity(intent);
+//                	finish();
+//            	}
 //            	Intent intent = new Intent(view.getContext(), LoginActivity.class);
 //            	startActivity(intent);
 //            	finish();
@@ -127,6 +162,34 @@ public class PrintAtMITActivity extends Activity {
         });
     }
 
+    private void login(Bundle extras, View view) {
+    	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
+        EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
+        
+    	SharedPreferences.Editor prefsEditor = settings.edit();
+    	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, touchstoneUsername.getText().toString());
+    	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, touchstonePassword.getText().toString());
+    	prefsEditor.commit();
+    	
+    	if (extras != null) {
+    		String requestKey = extras.getString("requestKey");
+    		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
+			clientData.setTouchstoneState(MITClient.TOUCHSTONE_LOGIN);
+    	}
+    	ConnectionWrapper connection = new ConnectionWrapper(view.getContext());
+        // TODO add error handling
+    	long time = System.currentTimeMillis();
+    	// String URL = "https://wayf.mit.edu/WAYF?shire=https%3A%2F%2Fm.mit.edu%2FShibboleth.sso%2FSAML%2FPOST&time="+time+"&target=cookie%3Ab303acca&providerId=https%3A%2F%2Fm.mit.edu%2Fshibboleth";
+    	String URL = "http://m.mit.edu/api/?command=loans&module=libraries";
+    	//String URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=name";
+    	boolean isStarted = connection.openURL(URL);
+    	Log.d(TAG, "opening lists");
+    	if (isStarted && settings.getString(MITClient.TOUCHSTONE_USERNAME, null) != null && !settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
+    		Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
+        	startActivity(intent);
+        	finish();
+    	}
+    }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);

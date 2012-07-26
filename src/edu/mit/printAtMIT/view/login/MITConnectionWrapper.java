@@ -29,7 +29,7 @@ public class MITConnectionWrapper extends ConnectionWrapper {
 	}
 		
 	public HttpResponse httpClientResponse(HttpGet httpGet) throws ClientProtocolException, IOException {
-		Log.d(TAG,"httpClientResponse from MITConnectionWrapper");
+		Log.d(TAG,"httpClientResponse from MITConnectionWrapper Class");
 		MITClient mitClient = new MITClient(mContext);
 		mitClient.setState(MITClient.WAYF_STATE);
 		HttpResponse response = null;
