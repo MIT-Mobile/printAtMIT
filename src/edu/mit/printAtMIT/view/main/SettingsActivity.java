@@ -42,6 +42,7 @@ import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
+import edu.mit.printAtMIT.view.login.MITClient;
 import edu.mit.printAtMIT.view.print.PrintMenuActivity;
 
 /**
@@ -99,7 +100,7 @@ public class SettingsActivity extends ListActivity {
 		});
         SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
         items.add(new SectionItem("User info"));
-        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(PrintAtMITActivity.USERNAME, ""), ITEM_USERNAME));
+        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(MITClient.TOUCHSTONE_USERNAME, ""), ITEM_USERNAME));
         
         items.add(new SectionItem("Printer Preferences"));
         items.add(new EntryItem("Ink Color", userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE), ITEM_INKCOLOR));
@@ -111,7 +112,7 @@ public class SettingsActivity extends ListActivity {
         setListAdapter(adapter);
         
         // set print options
-        userName = userSettings.getString(PrintAtMITActivity.USERNAME, "");
+        userName = userSettings.getString(MITClient.TOUCHSTONE_USERNAME, "");
         numCopies = userSettings.getInt(PrintAtMITActivity.COPIES, 1);
         if (userSettings.getString(PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE).equals("Color"))
         	queue = "color";

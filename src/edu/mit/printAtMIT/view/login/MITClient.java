@@ -71,6 +71,7 @@ public class MITClient extends DefaultHttpClient {
 	public static final String IDP_STATE = "idp";
 	public static final String AUTH_STATE = "auth";
 	public static final String ERROR_STATE = "error";	
+	public static final String NO_INPUT_ERROR_STATE = "no_input";
 	public static final String AUTH_ERROR_STATE = "auth_error";
 	public static final String CANCELLED_STATE = "cancelled";	
 	public static final String AUTH_ERROR_KERBEROS = "Error: Please enter a valid username and password"; // error message from invalid kerberos login
@@ -157,7 +158,7 @@ public class MITClient extends DefaultHttpClient {
 				if (locations.length > 0) {
 					Header location = locations[0];
 					String uriString = location.getValue();
-					//Log.d(TAG,"uriString from redirect = " + uriString);
+					Log.d(TAG,"uriString from redirect = " + uriString);
 					try {
 						uri = new URI(uriString);
 						host = uri.getHost();
@@ -192,6 +193,7 @@ public class MITClient extends DefaultHttpClient {
 	
 		// Return result from buffered stream
 		String dataAsString = new String(content.toByteArray());
+		inputStream.close();
 		return dataAsString;
 		}
 		catch (IOException e) {
@@ -211,8 +213,9 @@ public class MITClient extends DefaultHttpClient {
 			Log.d(TAG, "state: " + state);
 			requestMap.put(requestKey, clientData);
 			response = this.execute(httpGet);
+			Log.d(TAG, "executed response");
 			responseEntity = response.getEntity();
-			
+			Log.d(TAG, "got response entitiy");
 			if (state == OK_STATE) {
 				Log.d(TAG, "ok state");
 				saveLogin();
@@ -253,7 +256,7 @@ public class MITClient extends DefaultHttpClient {
 				return response;
 			}
 
-			return null;
+			return response;
 		}
 		catch (IOException e) {
 			Log.d(TAG,"get response exception = " + e.getMessage());
@@ -272,92 +275,96 @@ public class MITClient extends DefaultHttpClient {
 			((MITClientData)requestMap.get(requestKey)).setTouchstoneState(TOUCHSTONE_REQUEST);
 			Intent touchstoneIntent = new Intent(mContext, PrintAtMITActivity.class);
 			touchstoneIntent.putExtra("requestKey",requestKey);
-			touchstoneIntent.putExtra("error", PrintAtMITActivity.NO_DATA_ENTRY);
-			((Activity) mContext).startActivity(touchstoneIntent);
-		
-			Log.d(TAG,"requestKey " + requestKey + " value = " + MITClient.requestMap.get(requestKey));
-			while( 	((MITClientData)MITClient.requestMap.get(requestKey)).getTouchstoneState().equalsIgnoreCase(TOUCHSTONE_REQUEST) ) {
-				// do stuff
-			    // don't burn the CPU
-			    try {
-			    	Log.d(TAG,"requestMap " + requestKey + " = " + requestMap.get(requestKey));
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			touchstoneIntent.putExtra("error", NO_INPUT_ERROR_STATE);
+			state = OK_STATE;
+			response = null;
+//			((Activity) mContext).startActivity(touchstoneIntent);
+//		
+//			Log.d(TAG,"requestKey " + requestKey + " value = " + MITClient.requestMap.get(requestKey));
+//			while( 	((MITClientData)MITClient.requestMap.get(requestKey)).getTouchstoneState().equalsIgnoreCase(TOUCHSTONE_REQUEST) ) {
+//				// do stuff
+//			    // don't burn the CPU
+//			    try {
+//			    	Log.d(TAG,"requestMap " + requestKey + " = " + requestMap.get(requestKey));
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
 					
 		}
-		Log.d(TAG,"request key in wayf = " + requestKey);
-		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
-		Log.d(TAG,"touchstone state = " + clientData.getTouchstoneState());
-		if ( clientData.getTouchstoneState() == null || clientData.getTouchstoneState().equalsIgnoreCase(TOUCHSTONE_LOGIN) ) {
-			post = new HttpPost();
-			
-			post.setURI(uri);
-			Log.d(TAG,"post uri in wayf = " + uri.toString() + " "  + uri.getHost() + " " + uri.getRawQuery());
-
-			String user_idp;
-			String tmpUser = user.toUpperCase();
-			Log.d(TAG,"user = " + user);
-			if (tmpUser.contains("@") && !tmpUser.contains("@MIT.EDU")) {
-				user_idp = "https://idp.touchstonenetwork.net/shibboleth-idp";
-			}
-			else {
-				user_idp = "https://idp.mit.edu/shibboleth";				
-				// remove "@MIT.EDU from user name
-				if (tmpUser.contains("@MIT.EDU")) {
-					user = user.substring(0,user.length() - 8);
-					Log.d(TAG,"user = " + user);
-				}
-			}
-
-			Log.d(TAG,"user_idp = " + user_idp);
-			
-			// Add your data
-			List nameValuePairs = new ArrayList(1);
-			nameValuePairs.add(new BasicNameValuePair("user_idp", user_idp));
-			try {
-				post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}  
-			
-			try {
-				response = this.execute(post);
+		else {
+			Log.d(TAG,"request key in wayf = " + requestKey);
+			MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
+			Log.d(TAG,"touchstone state = " + clientData.getTouchstoneState());
+			if ( clientData.getTouchstoneState() == null || clientData.getTouchstoneState().equalsIgnoreCase(TOUCHSTONE_LOGIN) ) {
+				post = new HttpPost();
 				
-				Header[] locations = response.getHeaders("Location");
-				if (locations.length > 0) {
-					Header location = locations[0];
-					uriString = location.getValue();				
-					try {
-						uri = new URI(uriString);
-					}
-					catch (URISyntaxException e) {
-						
-					}				
-				}
-				
-				if (response.getStatusLine().getStatusCode() == 200 && !uri.getHost().equalsIgnoreCase("wayf.mit.edu")) {
-					state = IDP_STATE;
+				post.setURI(uri);
+				Log.d(TAG,"post uri in wayf = " + uri.toString() + " "  + uri.getHost() + " " + uri.getRawQuery());
+	
+				String user_idp;
+				String tmpUser = user.toUpperCase();
+				Log.d(TAG,"user = " + user);
+				if (tmpUser.contains("@") && !tmpUser.contains("@MIT.EDU")) {
+					user_idp = "https://idp.touchstonenetwork.net/shibboleth-idp";
 				}
 				else {
-					responseString = responseContentToString(response);
+					user_idp = "https://idp.mit.edu/shibboleth";				
+					// remove "@MIT.EDU from user name
+					if (tmpUser.contains("@MIT.EDU")) {
+						user = user.substring(0,user.length() - 8);
+						Log.d(TAG,"user = " + user);
+					}
+				}
+	
+				Log.d(TAG,"user_idp = " + user_idp);
+				
+				// Add your data
+				List nameValuePairs = new ArrayList(1);
+				nameValuePairs.add(new BasicNameValuePair("user_idp", user_idp));
+				try {
+					post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}  
+				
+				try {
+					response = this.execute(post);
+					
+					Header[] locations = response.getHeaders("Location");
+					if (locations.length > 0) {
+						Header location = locations[0];
+						uriString = location.getValue();				
+						try {
+							uri = new URI(uriString);
+						}
+						catch (URISyntaxException e) {
+							
+						}				
+					}
+					// Log.d(TAG, ""+response.getStatusLine().getStatusCode());
+					if (response.getStatusLine().getStatusCode() == 200 /* && !uri.getHost().equalsIgnoreCase("wayf.mit.edu") */ ) {
+						state = IDP_STATE;
+					}
+					else {
+						responseString = responseContentToString(response);
+					}
+					
+					// Log.d(TAG,"response string at end of wayf = " + responseString);
+					// Log.d(TAG,"state after WAYF post = " + state);
+				}
+				catch (IOException e) {
+					Log.d(TAG,"WAYF error " + e.getMessage());
 				}
 				
-				//Log.d(TAG,"response string at end of wayf = " + responseString);
-				//Log.d(TAG,"state after WAYF post = " + state);
-			}
-			catch (IOException e) {
-				Log.d(TAG,"WAYF error " + e.getMessage());
 			}
 			
-		}
-		
-		else {
-			state = CANCELLED_STATE;
+			else {
+				state = CANCELLED_STATE;
+			}
 		}
 	}
 	
@@ -371,7 +378,7 @@ public class MITClient extends DefaultHttpClient {
 		// parse response string to html document
 		String responseString = responseContentToString(response);
 		
-		//Log.d(TAG,"response string in idp = " + responseString);
+		// Log.d(TAG,"response string in idp = " + responseString);
 		document = Jsoup.parse(responseString);
 	
 		// get form action
@@ -446,6 +453,7 @@ public class MITClient extends DefaultHttpClient {
 			Log.d(TAG,"login error");
 		}
 		else {
+			// Log.d(TAG,"response string in idp = " + responseString);
 			document = Jsoup.parse(responseString);
 		
 			// get form action
@@ -495,6 +503,8 @@ public class MITClient extends DefaultHttpClient {
 		
 			try {
 				response = this.execute(post);
+				//dummy string?
+				//String responseToString = responseContentToString(response);
 				//this.saveCookies();
 				//Log.d(TAG,"status from IDP post = " + response.getStatusLine().getStatusCode());
 				if (response.getStatusLine().getStatusCode() == 200) {
@@ -585,8 +595,12 @@ public class MITClient extends DefaultHttpClient {
 		clientData.setTouchstoneState(TOUCHSTONE_REQUEST);
 		Intent touchstoneIntent = new Intent(mContext, PrintAtMITActivity.class);
 		touchstoneIntent.putExtra("requestKey",requestKey);
-		touchstoneIntent.putExtra("touchstoneState",AUTH_ERROR_STATE);
+		touchstoneIntent.putExtra("error", AUTH_ERROR_STATE);
 
+		prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, null);
+		prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, null);
+		prefsEditor.commit();
+		
 		((Activity) mContext).startActivity(touchstoneIntent);
 	
 		Log.d(TAG,"Sending auth error state to touchstone" + requestKey);
@@ -607,6 +621,7 @@ public class MITClient extends DefaultHttpClient {
 		if (!clientData.getTouchstoneState().equals(TOUCHSTONE_CANCEL)) {
 	        // retry login
 			response = getResponse(new HttpGet(targetUri));
+			Log.d(TAG, "retrying login");
 		}
 		else {
 			state = CANCELLED_STATE;

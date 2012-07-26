@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="lib" path="/home/qlong/projects/printatmit/printAtMIT/libs/droidText.0.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Steph/printAtMIT/printAtMIT/libs/droidText.0.2.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

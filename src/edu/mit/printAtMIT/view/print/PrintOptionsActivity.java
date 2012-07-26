@@ -65,6 +65,7 @@ import edu.mit.printAtMIT.view.list.EntryItem;
 import edu.mit.printAtMIT.view.list.Item;
 import edu.mit.printAtMIT.view.list.SectionItem;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
+import edu.mit.printAtMIT.view.login.MITClient;
 import edu.mit.printAtMIT.view.main.SettingsActivity;
 
 /**
@@ -204,8 +205,7 @@ public class PrintOptionsActivity extends ListActivity {
         items.add(new SectionItem("File name"));
         items.add(new EntryItem(fileName, fileLoc, ITEM_FILENAME));
         items.add(new SectionItem("Kerberos Id"));
-        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(
-                PrintAtMITActivity.USERNAME, ""), ITEM_USERNAME));
+        items.add(new EntryItem("Change Kerberos Id", userSettings.getString(MITClient.TOUCHSTONE_USERNAME, ""), ITEM_USERNAME));
         items.add(new SectionItem("Printer Preferences"));
         items.add(new EntryItem("Ink Color", userSettings.getString(
                 PrintAtMITActivity.INKCOLOR, PrintAtMITActivity.BLACKWHITE),
@@ -337,6 +337,7 @@ public class PrintOptionsActivity extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
+<<<<<<< HEAD
         if (!items.get(position).isSection()) {
             switch (position) {
             // popup dialog appears for username
@@ -457,6 +458,104 @@ public class PrintOptionsActivity extends ListActivity {
         }
 
         super.onListItemClick(l, v, position, id);
+=======
+    	if(!items.get(position).isSection()){
+    		switch(position) {
+    		//popup dialog appears for username
+    		//saves user-inputted username
+    		case ITEM_USERNAME:
+    			final Dialog dialog = new Dialog(this);
+
+    			dialog.setContentView(R.layout.username_dialog);
+    			dialog.setTitle("Change Kerberos Id");
+    			dialog.show();
+    			
+    			Button saveButton = (Button) dialog.findViewById(R.id.save);
+    			EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
+    			textfield.setImeOptions(EditorInfo.IME_ACTION_DONE);
+    	        
+    	        saveButton.setOnClickListener(new View.OnClickListener() {
+
+    	            public void onClick(View view) {
+    	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+    	            	EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
+    	            	SharedPreferences.Editor editor = userSettings.edit();
+    	                editor.putString(MITClient.TOUCHSTONE_USERNAME, textfield.getText().toString());
+    	                userName = textfield.getText().toString();
+    	                editor.commit();
+    	      
+    	                items.set(ITEM_USERNAME, new EntryItem("Change Kerberos Id", textfield.getText().toString(), ITEM_USERNAME));
+    	                EntryAdapter adapter = new EntryAdapter(view.getContext(), items);
+    	                setListAdapter(adapter);
+    	                dialog.dismiss();
+    	            }
+    	        });
+    	        
+        		return;
+    		case ITEM_FILENAME:
+/*    			final Dialog fileDialog = new Dialog(this);
+
+    			fileDialog.setContentView(R.layout.about_dialog);
+    			fileDialog.setTitle(fileName);
+    			TextView filename = (TextView) fileDialog.findViewById(R.id.about_text);
+    			filename.setText(fileLoc);
+    			fileDialog.show();
+    	        */
+        		return;
+        	//context menu appears for ink color
+    		case ITEM_INKCOLOR: 
+    			registerForContextMenu( v ); 
+    		    v.setLongClickable(false); 
+    		    this.openContextMenu(v);
+    		   
+    			break;
+    		case ITEM_COPIES:
+    			// dialog pops up for copy number
+    			final View view = v;
+
+    			final SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
+    		  
+    			final EditText copy = new EditText(this);
+    			copy.setInputType(InputType.TYPE_CLASS_NUMBER);
+              
+    			AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+      		  	builder.setMessage("Number of copies:")
+      		  			.setCancelable(false)
+	        	        .setView(copy)
+	        	        .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+	        	        	public void onClick(DialogInterface dialog, int id) {	        	        		
+	        	    			int copies = userSettings.getInt(PrintAtMITActivity.COPIES, 1);
+	        	    			String text = copy.getText().toString();
+	        	        		copies = (text.equals("") || text.equals("0")) ? copies : Integer.parseInt(copy.getText().toString());
+	        	       	      	numCopies = copies;
+	        	       	      	
+	         	                items.set(ITEM_COPIES, new EntryItem("Copies", "" + copies, ITEM_COPIES));
+	
+	         	                EntryAdapter adapter = new EntryAdapter(view.getContext(), items);
+	         	                setListAdapter(adapter);
+	         	                
+	         	                dialog.dismiss();
+	        	             }
+	        	         })
+	        	         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        	             public void onClick(DialogInterface dialog, int id) {
+	        	                  dialog.cancel();
+	        	             }
+	        	         });
+      		  	AlertDialog alert = builder.create();
+	        	alert.show();
+	        	
+	        	// have soft keyboard automatically show up
+				alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+	        	break;
+    		default: Toast.makeText(this, "herp derp", Toast.LENGTH_SHORT).show(); break;
+    		}
+    		
+    	}
+    	
+    	super.onListItemClick(l, v, position, id);
+>>>>>>> Enabled Touchstone login for phone log-in.
     }
 
     public class ConvertAndPrintTask extends AsyncTask<Void, Void, Boolean> {
