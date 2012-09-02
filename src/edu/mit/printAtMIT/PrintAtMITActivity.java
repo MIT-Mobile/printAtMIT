@@ -1,23 +1,19 @@
 package edu.mit.printAtMIT;
 
 import java.io.InputStream;
+import java.security.KeyStore;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import edu.mit.printAtMIT.view.login.MITClientData;
+import org.apache.http.client.HttpClient;
+import edu.mit.printAtMIT.controller.client.PrinterClientException;
+import edu.mit.printAtMIT.model.touchstone.MobileAPI;
+import edu.mit.printAtMIT.model.touchstone.MobileResponseHandler;
+import edu.mit.printAtMIT.model.touchstone.PrintAuthenticationHandler;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
-import edu.mit.printAtMIT.view.login.ConnectionWrapper;
-import edu.mit.printAtMIT.view.login.ConnectionWrapper.ConnectionInterface;
-import edu.mit.printAtMIT.view.login.ConnectionWrapper.ErrorType;
-import edu.mit.printAtMIT.view.login.LoginActivity;
 import edu.mit.printAtMIT.view.login.MITClient;
-import edu.mit.printAtMIT.view.login.MITConnectionWrapper;
-import edu.mit.printAtMIT.view.login.MobileWebApi.HttpClientType;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -39,6 +35,7 @@ public class PrintAtMITActivity extends Activity {
     public static final String COLOR = "Color";
 
     public static final String NO_DATA_ENTRY = "NO_DATA_ENTRY";
+    public static HttpClient HTTP_CLIENT;                     // Singleton to store session after logging in. USE FOR ALL HTTP REQUESTS
     private static SharedPreferences settings;
     private static final String TAG = "PrintAtMITActivity";
     
@@ -48,6 +45,7 @@ public class PrintAtMITActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        Log.d(TAG, "testing");
         if (settings.getString(MITClient.TOUCHSTONE_USERNAME, null) == null || settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
             startLogin();
         } else {
@@ -96,9 +94,7 @@ public class PrintAtMITActivity extends Activity {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-					ProgressDialog progress = ProgressDialog.show(v.getContext(), "", "Logging in...");
 					login(extras, v);
-					progress.cancel();
 					return true;
 				}
 				return false;
@@ -107,57 +103,7 @@ public class PrintAtMITActivity extends Activity {
         button01.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-            	ProgressDialog progress = ProgressDialog.show(view.getContext(), "", "Logging in...");
             	login(extras, view);
-            	progress.cancel();
-//            	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
-//                EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
-//                
-//            	SharedPreferences.Editor prefsEditor = settings.edit();
-//            	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, touchstoneUsername.getText().toString());
-//            	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, touchstonePassword.getText().toString());
-//            	prefsEditor.commit();
-//            	
-//            	if (extras != null) {
-//            		String requestKey = extras.getString("requestKey");
-//            		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
-//    				clientData.setTouchstoneState(MITClient.TOUCHSTONE_LOGIN);
-//            	}
-//            	ConnectionWrapper connection = new ConnectionWrapper(view.getContext());
-//                // TODO add error handling
-//            	long time = System.currentTimeMillis();
-//            	// String URL = "https://wayf.mit.edu/WAYF?shire=https%3A%2F%2Fm.mit.edu%2FShibboleth.sso%2FSAML%2FPOST&time="+time+"&target=cookie%3Ab303acca&providerId=https%3A%2F%2Fm.mit.edu%2Fshibboleth";
-//            	String URL = "http://m.mit.edu/api/?command=loans&module=libraries";
-//            	//String URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=name";
-//            	boolean isStarted = connection.openURL(URL);
-//            	
-//            	if (isStarted && settings.getString(MITClient.TOUCHSTONE_USERNAME, null) != null && !settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
-//            		Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
-//                	startActivity(intent);
-//                	finish();
-//            	}
-//            	Intent intent = new Intent(view.getContext(), LoginActivity.class);
-//            	startActivity(intent);
-//            	finish();
-//                EditText textfield = (EditText) findViewById(R.id.entry);
-//                if (!textfield.getText().toString().equals("")) {
-//                    SharedPreferences userSettings = getSharedPreferences(
-//                            PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
-//                    SharedPreferences.Editor editor = userSettings.edit();
-//                    editor.putString(PrintAtMITActivity.USERNAME, textfield
-//                            .getText().toString());
-//                    editor.putString(PrintAtMITActivity.INKCOLOR,
-//                            PrintAtMITActivity.BLACKWHITE);
-//                    editor.putInt(PrintAtMITActivity.COPIES, 1);
-//
-//                    // Commit the edits!
-//                    editor.commit();
-//
-//                    Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
-//                	startActivity(intent);
-//                	finish();
-//
-//                }
             }
         });
     }
@@ -166,77 +112,62 @@ public class PrintAtMITActivity extends Activity {
     	EditText touchstoneUsername = (EditText) findViewById(R.id.touchstoneUsername);
         EditText touchstonePassword = (EditText) findViewById(R.id.touchstonePassword);
         
-    	SharedPreferences.Editor prefsEditor = settings.edit();
-    	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, touchstoneUsername.getText().toString());
-    	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, touchstonePassword.getText().toString());
-    	prefsEditor.commit();
-    	
-    	if (extras != null) {
-    		String requestKey = extras.getString("requestKey");
-    		MITClientData clientData = (MITClientData)MITClient.requestMap.get(requestKey);
-			clientData.setTouchstoneState(MITClient.TOUCHSTONE_LOGIN);
-    	}
-    	ConnectionWrapper connection = new ConnectionWrapper(view.getContext());
-        // TODO add error handling
-    	long time = System.currentTimeMillis();
-    	// String URL = "https://wayf.mit.edu/WAYF?shire=https%3A%2F%2Fm.mit.edu%2FShibboleth.sso%2FSAML%2FPOST&time="+time+"&target=cookie%3Ab303acca&providerId=https%3A%2F%2Fm.mit.edu%2Fshibboleth";
-    	String URL = "http://m.mit.edu/api/?command=loans&module=libraries";
-    	//String URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=name";
-    	boolean isStarted = connection.openURL(URL);
-    	Log.d(TAG, "opening lists");
-    	if (isStarted && settings.getString(MITClient.TOUCHSTONE_USERNAME, null) != null && !settings.getString(MITClient.TOUCHSTONE_USERNAME, null).equals("")) {
-    		Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
-        	startActivity(intent);
-        	finish();
-    	}
+        final String username = touchstoneUsername.getText().toString();
+        final String password = touchstonePassword.getText().toString();
+        Log.d(TAG, "starting login");
+        Log.d(TAG, "username: " + username);
+        final View v = view;
+        final ProgressDialog progress = ProgressDialog.show(view.getContext(), "", "Logging in...");
+    	MobileResponseHandler handler = new MobileResponseHandler() {
+            public void onRequestCompleted(String result, HttpClient client) throws PrinterClientException {
+            	HTTP_CLIENT  = client;
+                Log.d("MobileAPI:libraries", "Request successfully completed:\n----\n'" + result + "'\n----");
+            	SharedPreferences.Editor prefsEditor = settings.edit();
+            	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, username);
+            	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, password);
+            	prefsEditor.commit();
+                progress.cancel();
+                Intent intent = new Intent(v.getContext(), MainMenuActivity.class);
+            	startActivity(intent);
+            	finish();
+            }
+
+            public void onCanceled() {
+                Log.d("MobileAPI:libraries", "Request was canceled");
+                progress.cancel();
+                System.out.println("cancelled");
+                Toast toast = Toast.makeText(v.getContext(), "Error logging in: check username and password", Toast.LENGTH_SHORT);
+            	toast.show();
+            }
+            public void onError(int code, String message) {
+                Log.d("MobileAPI:libraries", "Request encountered an error[" + code + "]: " + message);
+                System.out.println(message);
+                progress.cancel();
+                Toast toast = Toast.makeText(v.getContext(), message, Toast.LENGTH_SHORT);
+            	toast.show();
+            }
+        };
+
+        try {
+            KeyStore trusted = KeyStore.getInstance("BKS");
+            InputStream in = this.getApplicationContext().getResources().openRawResource(R.raw.mit_ts);
+            try {
+                trusted.load(in, "304mitca".toCharArray());
+            } finally {
+                in.close();
+            }
+            
+            MobileAPI.setAlternativeTrustStore(trusted);
+        } catch (Exception e) {
+            Log.d("TT:TrustStore", "Failed to initialize MIT trust store: " + e.getMessage());
+        }
+
+        MobileAPI apiTest = new MobileAPI(Uri.parse("https://mobile-print-dev.mit.edu/printatmit/query_result/"), null, handler);
+        
+        apiTest.execute(new PrintAuthenticationHandler(username, password));
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
-//
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        if (!settings.getString(USERNAME, "").equals("")) {
-//            MenuInflater inflater = getMenuInflater();
-//            inflater.inflate(R.menu.mainmenu_menu, menu);
-//        }
-//        return true;
-//    }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        if (!settings.getString(USERNAME, "").equals("")) {
-//            // Handle item selection
-//            switch (item.getItemId()) {
-//            case R.id.setting:
-//                Intent intent = new Intent(findViewById(android.R.id.content)
-//                        .getContext(), SettingsActivity.class);
-//                startActivity(intent);
-//                return true;
-//            case R.id.about:
-//            	showAboutDialog();
-//                super.onOptionsItemSelected(item);
-//                return true;
-//            default:
-//                return super.onOptionsItemSelected(item);
-//            }
-//        } else {
-//            return super.onOptionsItemSelected(item);
-//        }
-//    }
-    
-//    private void showAboutDialog() {
-//		showDialog(0);
-//	}
-//	@Override
-//	protected Dialog onCreateDialog(int id) {
-//		final Dialog dialog = new Dialog(this);
-//    	dialog.setContentView(R.layout.about_dialog);
-//    	dialog.setTitle("About");
-//    	TextView tv = (TextView) dialog.findViewById(R.id.about_text);
-//    	Linkify.addLinks(tv, Linkify.ALL);
-//    	tv.setMovementMethod(LinkMovementMethod.getInstance());
-//		return dialog;
-//	}
 }
