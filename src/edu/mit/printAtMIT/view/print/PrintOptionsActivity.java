@@ -477,7 +477,7 @@ public class PrintOptionsActivity extends ListActivity {
     	            	SharedPreferences userSettings = getSharedPreferences(PrintAtMITActivity.PREFS_NAME, MODE_PRIVATE);
     	            	EditText textfield = (EditText) dialog.findViewById(R.id.change_username);
     	            	SharedPreferences.Editor editor = userSettings.edit();
-    	                editor.putString(MITClient.TOUCHSTONE_USERNAME, textfield.getText().toString());
+    	                editor.putString(PrintAtMITActivity.TOUCHSTONE_USERNAME, textfield.getText().toString());
     	                userName = textfield.getText().toString();
     	                editor.commit();
     	      

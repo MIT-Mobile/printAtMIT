@@ -9,7 +9,6 @@ import edu.mit.printAtMIT.model.touchstone.MobileAPI;
 import edu.mit.printAtMIT.model.touchstone.MobileResponseHandler;
 import edu.mit.printAtMIT.model.touchstone.PrintAuthenticationHandler;
 import edu.mit.printAtMIT.view.listPrinter.MainMenuActivity;
-import edu.mit.printAtMIT.view.login.MITClient;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
@@ -108,8 +107,8 @@ public class PrintAtMITActivity extends Activity {
             	HTTP_CLIENT  = client;
                 Log.d("MobileAPI:libraries", "Request successfully completed:\n----\n'" + result + "'\n----");
             	SharedPreferences.Editor prefsEditor = settings.edit();
-            	prefsEditor.putString(MITClient.TOUCHSTONE_USERNAME, username);
-            	prefsEditor.putString(MITClient.TOUCHSTONE_PASSWORD, password);
+            	prefsEditor.putString(PrintAtMITActivity.TOUCHSTONE_USERNAME, username);
+            	prefsEditor.putString(PrintAtMITActivity.TOUCHSTONE_PASSWORD, password);
             	prefsEditor.commit();
                 progress.cancel();
                 Intent intent = new Intent(v.getContext(), MainMenuActivity.class);
