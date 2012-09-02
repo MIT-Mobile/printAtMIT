@@ -1,7 +1,6 @@
 package edu.mit.printAtMIT.controller.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,18 +15,16 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.model.printer.ListType;
 import edu.mit.printAtMIT.model.printer.Printer;
-import edu.mit.printAtMIT.model.printer.PrinterComparator;
 import edu.mit.printAtMIT.model.printer.PrintersDbAdapter;
 import edu.mit.printAtMIT.model.printer.SortType;
 import edu.mit.printAtMIT.view.list.Item;
@@ -36,17 +33,11 @@ import edu.mit.printAtMIT.view.list.SectionItem;
 
 public class PrinterClient {
     public static final String TAG = "PRINTERCLIENT";
-    //public static final String ALL_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%f&longitude=%f";
-    public static final String ALL_URL = "http://mobile-print-dev.mit.edu:8080/query_result/?sort=%s&latitude=%f&longitude=%f";
-
-    //public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
-    public static final String PRINTER_QUERY_URL = "http://mobile-print-dev.mit.edu:8080/query_result/?printer_query=%s";
-
+    public static final String ALL_URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%d&longitude=%d";
+    public static final String PRINTER_QUERY_URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";
-
-
     /**
      * @param context
      *      context where list is to be rendered
@@ -161,8 +152,6 @@ public class PrinterClient {
 
         }
 
-        // Collections.sort(printers, new PrinterComparator());
-
         switch (type) {
         case ALL:
             items.add(new SectionItem("All Printers"));
@@ -251,10 +240,9 @@ public class PrinterClient {
             Log.e("PrinterClient", "shouldn't reach here, yo");
             break;
         }
-        HttpClient client = new DefaultHttpClient();
         HttpGet request = new HttpGet();
         request.setURI(new URI(uri));
-        HttpResponse response = client.execute(request);
+        HttpResponse response = (PrintAtMITActivity.HTTP_CLIENT).execute(request);
         HttpEntity entity = response.getEntity();
         String json = Html.fromHtml(EntityUtils.toString(entity)).toString();
         JSONTokener tokener = new JSONTokener(json);
@@ -283,11 +271,10 @@ public class PrinterClient {
             throws PrinterClientException {
         Printer printer = null;
         String uri = String.format(PRINTER_QUERY_URL, name);
-        HttpClient client = new DefaultHttpClient();
         HttpGet request = new HttpGet();
         try {
             request.setURI(new URI(uri));
-            HttpResponse response = client.execute(request);
+            HttpResponse response = (PrintAtMITActivity.HTTP_CLIENT).execute(request);
             HttpEntity entity = response.getEntity();
             String json = Html.fromHtml(EntityUtils.toString(entity))
                     .toString();
