@@ -35,6 +35,9 @@ public class PrinterClient {
     public static final String TAG = "PRINTERCLIENT";
     public static final String ALL_URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?sort=%s&latitude=%f&longitude=%f";
     public static final String PRINTER_QUERY_URL = "https://mobile-print-dev.mit.edu/printatmit/query_result/?printer_query=%s";
+
+    public static final String HTMLTOPDF_URL = "https://mobile-print-dev.mit.edu/printatmit/convert_url/?url=%s";
+
     public static final String NAME_SORT = "name";
     public static final String BUILDING_SORT = "building";
     public static final String DISTANCE_SORT = "distance";

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +16,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -59,6 +62,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import edu.mit.printAtMIT.PrintAtMITActivity;
 import edu.mit.printAtMIT.R;
+import edu.mit.printAtMIT.controller.client.PrinterClient;
 import edu.mit.printAtMIT.model.print.Lpr;
 import edu.mit.printAtMIT.view.list.EntryAdapter;
 import edu.mit.printAtMIT.view.list.EntryItem;
@@ -608,34 +612,37 @@ public class PrintOptionsActivity extends ListActivity {
 
         private String convertUrl(String url) {
             try {
-                HttpClient client = new DefaultHttpClient();
-                String postURL = "http://pdfmyurl.com";
-                HttpPost post = new HttpPost(postURL);
-                List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-                pairs.add(new BasicNameValuePair("url", url));
-                pairs.add(new BasicNameValuePair("-O", "Portrait"));
-                UrlEncodedFormEntity ent = new UrlEncodedFormEntity(pairs,
-                        HTTP.UTF_8);
-                post.setEntity(ent);
-                HttpResponse responsePOST = client.execute(post);
-                HttpEntity resEntity = responsePOST.getEntity();
-
-                InputStream inputStream = resEntity.getContent();
+                String encodedURL = URLEncoder.encode(url, "UTF-8");
+                String uri = String.format(PrinterClient.HTMLTOPDF_URL, encodedURL);
+                HttpGet request = new HttpGet();
+                request.setURI(new URI(uri));
+                HttpResponse response = (PrintAtMITActivity.HTTP_CLIENT).execute(request);
+                HttpEntity resEntity = response.getEntity();
                 String intStorageDirectory = getFilesDir().toString();
                 File f = new File(intStorageDirectory, "printAtMIT.pdf");
 
-                OutputStream out = new FileOutputStream(f);
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    Log.i("ConvertAndPrintTask", "200 code");
 
-                int read = 0;
-                byte[] bytes = new byte[1024];
+                    InputStream inputStream = resEntity.getContent();
+                    OutputStream out = new FileOutputStream(f);
 
-                while ((read = inputStream.read(bytes)) != -1) {
-                    out.write(bytes, 0, read);
+                    int read = 0;
+                    byte[] bytes = new byte[1024];
+
+                    while ((read = inputStream.read(bytes)) != -1) {
+                        out.write(bytes, 0, read);
+                    }
+
+                    inputStream.close();
+                    out.flush();
+                    out.close();
                 }
+                else {
+                    Log.i("ConvertAndPrintTask", "400 code");
 
-                inputStream.close();
-                out.flush();
-                out.close();
+                    error = true;
+                }
 
             } catch (Exception e) {
                 Log.i("ConvertAndPrintTask", "Error converting url");
