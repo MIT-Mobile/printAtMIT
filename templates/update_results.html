@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Results{% endblock %}
+{% block body %}
+Database Updated
+<br /><br />
+{% for line in output %}
+    {{ line }}<br />
+{% endfor %}
+{% endblock body %}

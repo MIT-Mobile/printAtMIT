@@ -1,0 +1,11 @@
+html {
+    font-family:"courier";
+} 
+
+input.location-input {
+    display:none;
+}
+
+input[type=radio] {
+    vertical-align:middle;
+}

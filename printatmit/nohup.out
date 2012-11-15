@@ -1,0 +1,269 @@
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 00:07:54] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:08:47] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:08:47] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:09:02] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:10:31] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:10:33] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:10:33] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:10:52] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:14:35] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:14:47] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:14:48] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:14:48] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:15:02] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:15:03] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:17:14] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:19:46] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:24:50] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:24:51] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:24:51] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:25:06] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:25:10] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:25:10] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:25:29] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:37:50] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:37:52] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:37:58] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:37:59] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:00] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:00] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:00] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:00] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:09] "GET / HTTP/1.1" 200 2059
+[04/Mar/2012 00:38:19] "GET / HTTP/1.1" 200 2059
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x1474910>>
+Error in sys.excepthook:
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/abrt_exception_handler.py", line 149, in <lambda>
+    sys.excepthook = lambda etype, value, tb: handleMyException((etype, value, tb))
+TypeError: 'NoneType' object is not callable
+
+Original exception was:
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/django/core/management/commands/runserver.py", line 107, in inner_run
+    run(self.addr, int(self.port), handler, ipv6=self.use_ipv6)
+  File "/usr/lib/python2.6/site-packages/django/core/servers/basehttp.py", line 696, in run
+    httpd.serve_forever()
+  File "/usr/lib64/python2.6/SocketServer.py", line 224, in serve_forever
+    r, w, e = select.select([self], [], [], poll_interval)
+AttributeError: 'NoneType' object has no attribute 'select'
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0xddb910>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/django/core/management/commands/runserver.py", line 88, in inner_run
+    self.validate(display_num_errors=True)
+  File "/usr/lib/python2.6/site-packages/django/core/management/base.py", line 249, in validate
+    num_errors = get_validation_errors(s, app)
+  File "/usr/lib/python2.6/site-packages/django/core/management/validation.py", line 102, in get_validation_errors
+    connection.validation.validate_field(e, opts, f)
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/validation.py", line 14, in validate_field
+    db_version = self.connection.get_server_version()
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/base.py", line 338, in get_server_version
+    self.cursor()
+  File "/usr/lib/python2.6/site-packages/django/db/backends/__init__.py", line 250, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/base.py", line 322, in _cursor
+    self.connection = Database.connect(**kwargs)
+  File "/usr/lib64/python2.6/site-packages/MySQLdb/__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "/usr/lib64/python2.6/site-packages/MySQLdb/connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+_mysql_exceptions.OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x23c9910>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/django/core/management/commands/runserver.py", line 88, in inner_run
+    self.validate(display_num_errors=True)
+  File "/usr/lib/python2.6/site-packages/django/core/management/base.py", line 249, in validate
+    num_errors = get_validation_errors(s, app)
+  File "/usr/lib/python2.6/site-packages/django/core/management/validation.py", line 102, in get_validation_errors
+    connection.validation.validate_field(e, opts, f)
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/validation.py", line 14, in validate_field
+    db_version = self.connection.get_server_version()
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/base.py", line 338, in get_server_version
+    self.cursor()
+  File "/usr/lib/python2.6/site-packages/django/db/backends/__init__.py", line 250, in cursor
+    cursor = self.make_debug_cursor(self._cursor())
+  File "/usr/lib/python2.6/site-packages/django/db/backends/mysql/base.py", line 322, in _cursor
+    self.connection = Database.connect(**kwargs)
+  File "/usr/lib64/python2.6/site-packages/MySQLdb/__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "/usr/lib64/python2.6/site-packages/MySQLdb/connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+_mysql_exceptions.OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 01:41:21] "GET / HTTP/1.1" 500 74771
+[04/Mar/2012 01:41:39] "GET / HTTP/1.1" 500 86133
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 01:43:06] "GET / HTTP/1.1" 404 2000
+[04/Mar/2012 01:43:26] "GET /admin HTTP/1.1" 301 0
+[04/Mar/2012 01:43:26] "GET /admin/ HTTP/1.1" 200 2028
+[04/Mar/2012 01:43:39] "POST /admin/ HTTP/1.1" 302 0
+[04/Mar/2012 01:43:39] "GET /admin/ HTTP/1.1" 200 3429
+[04/Mar/2012 01:43:50] "GET /admin/sites/site/ HTTP/1.1" 200 4711
+[04/Mar/2012 01:43:50] "GET /admin/jsi18n/ HTTP/1.1" 200 2158
+[04/Mar/2012 01:43:54] "GET /admin/ HTTP/1.1" 200 3429
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:23:54] "GET / HTTP/1.1" 404 2118
+[04/Mar/2012 02:24:00] "GET /printatmit/query HTTP/1.1" 500 82459
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:25:11] "GET /printatmit/query HTTP/1.1" 500 73470
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:26:22] "GET /printatmit/query HTTP/1.1" 500 76992
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:28:48] "GET /printatmit/query HTTP/1.1" 500 77027
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:29:05] "GET /printatmit/query HTTP/1.1" 500 82261
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:29:27] "GET /printatmit/query HTTP/1.1" 500 82343
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+[04/Mar/2012 02:29:49] "GET /printatmit/query HTTP/1.1" 500 118424
+[04/Mar/2012 02:30:09] "GET /printatmit/query HTTP/1.1" 200 277
+[04/Mar/2012 02:30:12] "GET /printatmit/query?printer_query=dfd HTTP/1.1" 200 277
+[04/Mar/2012 02:30:22] "GET /printatmit/query?printer_query=jkill HTTP/1.1" 200 277
+[04/Mar/2012 02:30:26] "GET /printatmit/query?printer_query=jkl HTTP/1.1" 200 277
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x215ba90>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/django/core/management/commands/runserver.py", line 88, in inner_run
+    self.validate(display_num_errors=True)
+  File "/usr/lib/python2.6/site-packages/django/core/management/base.py", line 253, in validate
+    raise CommandError("One or more models did not validate:\n%s" % error_text)
+django.core.management.base.CommandError: One or more models did not validate:
+printers.printer: "name": CharFields require a "max_length" attribute that is a positive integer.
+printers.printer: "location": CharFields require a "max_length" attribute that is a positive integer.
+printers.printer: "location_name": CharFields require a "max_length" attribute that is a positive integer.
+
+Unhandled exception in thread started by <bound method Command.inner_run of <django.contrib.staticfiles.management.commands.runserver.Command object at 0x1606a90>>
+Validating models...
+
+Traceback (most recent call last):
+  File "/usr/lib/python2.6/site-packages/django/core/management/commands/runserver.py", line 88, in inner_run
+    self.validate(display_num_errors=True)
+  File "/usr/lib/python2.6/site-packages/django/core/management/base.py", line 249, in validate
+    num_errors = get_validation_errors(s, app)
+  File "/usr/lib/python2.6/site-packages/django/core/management/validation.py", line 35, in get_validation_errors
+    for (app_name, error) in get_app_errors().items():
+  File "/usr/lib/python2.6/site-packages/django/db/models/loading.py", line 146, in get_app_errors
+    self._populate()
+  File "/usr/lib/python2.6/site-packages/django/db/models/loading.py", line 61, in _populate
+    self.load_app(app_name, True)
+  File "/usr/lib/python2.6/site-packages/django/db/models/loading.py", line 78, in load_app
+    models = import_module('.models', app_name)
+  File "/usr/lib/python2.6/site-packages/django/utils/importlib.py", line 35, in import_module
+    __import__(name)
+  File "/home/printapi/printatmit/printers/models.py", line 15
+    status = models.Integer(choices=((0, u'Available'), (1, u'Busy'), (2, u'Error)) 
+                                                                                   ^
+SyntaxError: EOL while scanning string literal
+[04/Mar/2012 18:39:45] "GET /admin/ HTTP/1.1" 200 4805
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+Error: That port is already in use.
+[25/Jul/2012 22:13:01] "GET /query_result/?sort=name&latitude=0.000000&longitude=0.000000 HTTP/1.1" 200 21011
+Validating models...
+
+0 errors found
+Django version 1.3.1, using settings 'printatmit.settings'
+Development server is running at http://0.0.0.0:8080/
+Quit the server with CONTROL-C.

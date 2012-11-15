@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block body %}
+  <p>Enter printer name here: <br /> e.g. clearcut-p</p>
+
+  <form action='{% url printatmit.printers.views.query_result %}' method='GET'>
+    <input type='text' name='printer_query'>
+    <input type='submit' value='query'>
+  </form>
+  <br /><br />
+
+<div>
+  <p>Click to get all printer data</p>
+  <form action='{% url printatmit.printers.views.query_result %}'>
+    <input type='radio' name='sort' value='name'>Sort by Name</input>
+    <br />
+    <br />
+    <input type='radio' name='sort' value='building'>Sort by Building</input>
+    <br />
+    <br />
+    <input type='radio' name='sort' value='distance' id='location-sort'>Sort by Distance</input>
+    <br />
+    <br />
+    Latitude: <input type='text' name='latitude' id='latitude' class='location-input'>
+    <br />
+    <br />
+    Longitude: <input type='text' name='longitude' id='longitude' class='location-input'>
+    <br />
+    <br />
+    <b>Get Data: </b><input type='submit' name='printer_data' value='get_all'>
+  </form>
+</div>
+<br /><br />
+<div>
+  <p>Update Database</p>
+  <form action='{% url printatmit.printers.views.update %}'>
+    <input type='submit' name='update_printers' value='update'>
+  </form>
+</div>
+
+
+
+{% endblock body %}
+
