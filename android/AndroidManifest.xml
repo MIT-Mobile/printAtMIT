@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="edu.mit.printAtMIT"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk android:minSdkVersion="10" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <application android:icon="@drawable/ic_launcher" 
+                 android:label="@string/app_name" 
+                 android:debuggable="true">
+        <uses-library android:name="com.google.android.maps" />
+        
+        <activity
+            android:name=".PrintAtMITActivity"
+            android:label="print@mit"
+            android:theme="@style/printatmitTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+ 	    <activity android:name=".view.login.LoginActivity"></activity>
+        <activity android:name=".view.listPrinter.MainMenuActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme"></activity>
+        <activity android:name=".view.listPrinter.TestActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme"></activity>
+        <activity android:name=".view.main.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme"></activity>
+        <activity android:name=".view.print.PrintDownloadsActivity"
+            android:theme="@style/printatmitTheme"/>
+        <activity android:name=".view.print.PrintMenuActivity" 
+             android:theme="@style/printatmitTheme"/>
+        <activity android:name=".view.print.PrintOptionsActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:theme="@style/printatmitTheme">
+    		<intent-filter>
+        		<action android:name="android.intent.action.VIEW" />
+        		<category android:name="android.intent.category.DEFAULT" />
+        		<category android:name="android.intent.category.BROWSABLE" />
+        		<data android:mimeType="text/plain" />
+        		<data android:mimeType="application/pdf" />
+        		<data android:mimeType="application/postscript" />
+        		<data android:mimeType="image/*" />
+    		</intent-filter>
+    		<intent-filter>
+   				<action android:name="android.intent.action.SEND" />
+   				<category android:name="android.intent.category.DEFAULT" />
+   				<data android:mimeType="text/plain" />
+   				<data android:mimeType="image/*" />
+			</intent-filter>
+        </activity>
+        
+        <activity android:name=".view.listPrinter.PrinterMapActivity" 
+                  android:launchMode="singleTop"  
+                  android:process="map.test"
+                  android:configChanges="keyboardHidden|orientation">
+            <action android:name="android.intent.action.MAIN" />
+        </activity>
+        
+        <activity android:name=".view.listPrinter.PrinterInfoActivity"
+                  android:configChanges="keyboardHidden|orientation"
+                  android:theme="@style/printatmitTheme"></activity>
+        <activity android:name=".view.listPrinter.PrintListMenuActivity"></activity>
+        <activity android:name=".view.listPrinter.PrinterListActivity"
+                  android:configChanges="keyboardHidden|orientation"></activity>
+        <activity android:name=".view.listPrinter.PrinterListCampusActivity"
+                  android:configChanges="keyboardHidden|orientation"></activity>
+        <activity android:name=".view.listPrinter.PrinterListDormActivity"
+                  android:configChanges="keyboardHidden|orientation"></activity>
+    </application>
+
+</manifest>

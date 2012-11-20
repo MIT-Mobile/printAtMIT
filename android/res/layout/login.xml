@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent" 
+                android:layout_height="fill_parent"
+                android:orientation="vertical"
+                android:background="@color/background">
+
+    <View android:id="@+id/top_bar" 
+        	android:background="@color/red"
+			android:layout_width="fill_parent"
+			android:layout_height="12dp" 
+	/>
+    
+     <View android:id="@+id/bottom_bar" 
+         	android:layout_alignParentBottom="true"
+        	android:background="@color/red"
+			android:layout_width="fill_parent"
+			android:layout_height="12dp" 
+	/>
+    
+    <View android:id="@+id/helper1" 
+			android:layout_width="0dp"
+			android:layout_height="0dp" 
+			android:layout_centerHorizontal="true" 
+			android:layout_centerVertical="true"
+	/>
+    <!-- User Name -->
+		<EditText 
+			android:id="@+id/touchstoneUsername"
+	       	android:singleLine="true" 
+	       	android:lines="1"
+	       	android:hint="Username or Email"
+	       	android:layout_width="200dp" 
+              android:layout_height="wrap_content" 
+              android:layout_above="@id/helper1"
+              android:background="@android:drawable/editbox_background"
+              android:layout_centerHorizontal="true"
+              android:inputType="text"
+              android:imeOptions="actionNext"
+              android:imeActionLabel="Next"
+              android:layout_marginTop="15dp"
+              android:layout_marginBottom="-10dp"/>	
+    <!-- Password -->
+		<EditText 
+			android:id="@+id/touchstonePassword"
+	        android:singleLine="true" 
+	        android:lines="1"
+	        android:hint="Password"
+	        android:password="true"
+	        android:layout_below="@id/helper1"
+	        android:layout_width="200dp" 
+              android:layout_height="wrap_content" 
+              android:background="@android:drawable/editbox_background"
+              android:layout_centerHorizontal="true"
+              android:inputType="text"
+              android:imeOptions="actionDone"
+              android:imeActionLabel="Login"
+              android:layout_marginTop="15dp"
+              android:layout_marginBottom="-55dp"/>
+		
+		<ImageView 
+	   android:id="@+id/logo"
+	   android:src="@drawable/blurb"
+	   android:layout_above="@id/touchstoneUsername"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content"
+	   android:layout_centerHorizontal="true" 
+	   android:layout_marginBottom="-10dp"
+	   />
+			
+		<Button 
+			android:id="@+id/touchstoneLoginButton" 
+			android:background="@color/transparent"
+			android:layout_width="wrap_content" 
+			android:drawableTop="@drawable/touchstone_login_button"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/helper1"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="75dp" >
+		</Button>
+   	
+</RelativeLayout>
