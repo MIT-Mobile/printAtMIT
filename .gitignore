@@ -1,0 +1,5 @@
+*.pyc
+printer_list.py
+apache/
+cron/
+db/
