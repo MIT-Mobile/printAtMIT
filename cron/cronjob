@@ -1,5 +1,0 @@
-PATH=/usr/bin
-
-MAILTO="printatmit@gmail.com"
-
-*/3 * * * * python /home/printapi/cron/run.py
