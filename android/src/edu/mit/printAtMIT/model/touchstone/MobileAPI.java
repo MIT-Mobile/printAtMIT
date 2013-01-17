@@ -59,6 +59,7 @@ import edu.mit.printAtMIT.model.touchstone.internal.ChainedSSLSocketFactory;
 import edu.mit.printAtMIT.model.touchstone.internal.MobileRequest;
 import edu.mit.printAtMIT.model.touchstone.internal.MobileRequestState;
 import edu.mit.printAtMIT.model.touchstone.internal.MobileResponse;
+import edu.mit.printAtMIT.model.touchstone.internal.SerializableCookie;
 import edu.mit.printAtMIT.model.touchstone.internal.TouchstoneResponse;
 
 public class MobileAPI extends AsyncTask<IMobileAuthenticationHandler, Void, Void> {
@@ -95,6 +96,39 @@ public class MobileAPI extends AsyncTask<IMobileAuthenticationHandler, Void, Voi
         initConnectionManager(null);
     }
     
+    public static void serializeCookieStore(java.io.ObjectOutputStream out) throws IOException
+    {
+    	List<Cookie> cookies = _sharedCookieStore.getCookies();
+    	List<Cookie> serializableCookies = new ArrayList<Cookie>();
+    	
+    	for (Cookie cookie : cookies)
+    	{
+    		serializableCookies.add(new SerializableCookie(cookie));
+    	}
+    	
+    	out.writeObject(serializableCookies);
+    }
+    
+    public static void deserializeCookieStore(java.io.ObjectInputStream in)
+    		throws OptionalDataException, ClassNotFoundException, IOException
+    {
+    	Object cookiesObject = in.readObject();
+    	
+    	if (cookiesObject instanceof java.util.List<?>)
+    	{
+			List<?> cookies = (List<?>)(in.readObject());
+        	_sharedCookieStore.clear();
+        	
+        	for (Object cookie : cookies)
+        	{
+        		if (cookie instanceof org.apache.http.cookie.Cookie)
+        		{
+        			_sharedCookieStore.addCookie((org.apache.http.cookie.Cookie)cookie);
+        		}
+        	}
+    	}
+    }
+    
     private static String getDefaultUserAgent()
     {
         return "MIT Mobile Touchstone Test/1.0.0 (2.3.1-57-g657cca4;) Android/4.0.3 (armeabi-v7a; Motorola Xoom;)";
@@ -124,7 +158,6 @@ public class MobileAPI extends AsyncTask<IMobileAuthenticationHandler, Void, Voi
         
         registry.register(new Scheme("https", sslFactory, 443));
         _sharedSocketFactory = sslFactory;
-
 
         HttpParams managerParams = new BasicHttpParams();
 
