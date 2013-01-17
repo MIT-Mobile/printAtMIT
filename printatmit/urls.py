@@ -14,7 +14,7 @@ urlpatterns = patterns('',
     url(r'^query/$', views.query),
     url(r'^query_result/$', views.query_result),
     url(r'^printer_data/(\w+-?\w*)/$', views.printer_data),
-    url(r'^update_results/$', views.update),
+    url(r'^update_results/$', views.update_results),
     url(r'^convert_url/$', views.get_pdf_from_url),    
 
     # Uncomment the admin/doc line below to enable admin documentation:

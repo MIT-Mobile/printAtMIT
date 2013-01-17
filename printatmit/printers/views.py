@@ -88,7 +88,11 @@ def _alphanumeric_sort(list):
     return output
              
 
-def update(request):
+def update_results(request):
+    output = update()
+    return render_to_response("update_results.html", {'output':output})
+
+def update():
     output = []
     for printer in util.PRINTERS:
         #if not in database, create new Printer object
@@ -117,7 +121,7 @@ def update(request):
             obj.save()
             output.append("Updating printer row for: " + printer)
             output.append(serializers.serialize("json", Printer.objects.filter(pk=printer)))
-    return render_to_response("update_results.html", {'output':output})
+    return output
 
 def get_pdf_from_url(request):
     """
