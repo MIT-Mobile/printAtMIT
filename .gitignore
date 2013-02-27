@@ -1,5 +1,4 @@
 *.pyc
-README
 printer_list.py
 apache/
 cron/
