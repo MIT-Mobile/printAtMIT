@@ -1,5 +1,8 @@
 package edu.mit.printAtMIT.view.listPrinter;
 
+import com.markupartist.android.widget.ActionBar;
+import com.markupartist.android.widget.ActionBar.Action;
+
 import android.app.Dialog;
 import android.app.TabActivity;
 import android.content.Intent;
@@ -36,7 +39,14 @@ public class MainMenuActivity extends TabActivity{
         Log.i("PrinterListActivity", "Calling onCreate()");
 
         setContentView(R.layout.home_screen);
-    	
+        ActionBar actionBar = (ActionBar) findViewById(R.id.actionbar);
+	     // You can also assign the title programmatically by passing a
+	     // CharSequence or resource id.
+	     actionBar.setTitle("print@mit");
+	     Action homeAction = new ActionBar.IntentAction(this, new Intent(this, MainMenuActivity.class), R.drawable.ic_home);
+	     actionBar.setHomeAction(homeAction);
+//	     actionBar.addAction(new IntentAction(this, createShareIntent(), R.drawable.ic_title_share_default));
+//	     actionBar.addAction(new ToastAction());
         TabHost tabHost = getTabHost();  // The activity TabHost
         
         addTab(tabHost, PrinterListActivity.ALL_PRINTERS, R.drawable.all_tab);
@@ -44,35 +54,35 @@ public class MainMenuActivity extends TabActivity{
         addTab(tabHost, PrinterListActivity.DORM_PRINTERS, R.drawable.dorm_tab);
         tabHost.setCurrentTab(0);
         
-    	Button settingsButton = (Button) findViewById(R.id.settings_icon);
-    	Button printButton = (Button) findViewById(R.id.printer_icon);
-    	Button listButton = (Button) findViewById(R.id.list_icon);
-    	
-    	settingsButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(v.getContext(),
-						SettingsActivity.class);
-				startActivity(intent);
-			}
-		});
-    	
-    	printButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				Intent intent = new Intent(v.getContext(),
-						PrintMenuActivity.class);
-				startActivity(intent);
-			}
-		});
-    	
-    	listButton.setOnClickListener(new View.OnClickListener() {
-			
-			public void onClick(View v) {
-				TabHost tabHost = getTabHost();
-				tabHost.setCurrentTab(0);
-			}
-		});
+//    	Button settingsButton = (Button) findViewById(R.id.settings_icon);
+//    	Button printButton = (Button) findViewById(R.id.printer_icon);
+//    	Button listButton = (Button) findViewById(R.id.list_icon);
+//    	
+//    	settingsButton.setOnClickListener(new View.OnClickListener() {
+//			
+//			public void onClick(View v) {
+//				Intent intent = new Intent(v.getContext(),
+//						SettingsActivity.class);
+//				startActivity(intent);
+//			}
+//		});
+//    	
+//    	printButton.setOnClickListener(new View.OnClickListener() {
+//			
+//			public void onClick(View v) {
+//				Intent intent = new Intent(v.getContext(),
+//						PrintMenuActivity.class);
+//				startActivity(intent);
+//			}
+//		});
+//    	
+//    	listButton.setOnClickListener(new View.OnClickListener() {
+//			
+//			public void onClick(View v) {
+//				TabHost tabHost = getTabHost();
+//				tabHost.setCurrentTab(0);
+//			}
+//		});
     }
     
     /**
