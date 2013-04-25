@@ -1,4 +1,4 @@
-package edu.mit.printAtMIT.model.touchstone.authn;
+package edu.mit.printAtMIT.model.touchstoneOld.authn;
 
 public enum AuthenticationResult {
     AUTHENTICATION_FAILED,

@@ -1,4 +1,4 @@
-package edu.mit.printAtMIT.model.touchstone.internal;
+package edu.mit.printAtMIT.model.touchstoneOld.internal;
 
 public class MobileRequestState {
     public final MobileRequest request;

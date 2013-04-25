@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.mit.printAtMIT.model.touchstone.internal;
+package edu.mit.printAtMIT.model.touchstoneOld.internal;
 
 import android.net.Uri;
 import java.net.URLEncoder;

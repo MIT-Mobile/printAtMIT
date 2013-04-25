@@ -74,7 +74,7 @@
                   android:configChanges="keyboardHidden|orientation"></activity>
         <activity android:name=".view.listPrinter.PrinterListCampusActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>
-        <activity android:name=".view.listPrinter.PrinterListDormActivity"
+        <activity android:name="edu.mit.printAtMIT.view.listPrinter.PrinterListDormActivityerListDormActivityerListDormActivity"
                   android:configChanges="keyboardHidden|orientation"></activity>
     </application>
 

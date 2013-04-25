@@ -58,7 +58,7 @@
         android:layout_height="340dp"
         android:layout_weight="1"
         android:background="@color/background"
-        android:cacheColorHint="@color/transparent"
+        android:cacheColorHint="@android:color/transparent"
         android:drawSelectorOnTop="false" />
 	<Button
 	    android:id="@+id/print_button"

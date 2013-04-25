@@ -1,6 +1,6 @@
-package edu.mit.printAtMIT.model.touchstone.authn;
+package edu.mit.printAtMIT.model.touchstoneOld.authn;
 
-import edu.mit.printAtMIT.model.touchstone.MobileAPI;
+import edu.mit.printAtMIT.model.touchstoneOld.MobileAPI;
 
 public interface IMobileAuthenticationHandler {
     public void onAuthenticationChallenge(MobileAPI operation, IAuthenticationCallback callback);

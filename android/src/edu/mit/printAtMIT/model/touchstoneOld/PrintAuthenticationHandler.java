@@ -1,9 +1,9 @@
-package edu.mit.printAtMIT.model.touchstone;
+package edu.mit.printAtMIT.model.touchstoneOld;
 
 import android.util.Log;
-import edu.mit.printAtMIT.model.touchstone.authn.AuthenticationResult;
-import edu.mit.printAtMIT.model.touchstone.authn.IAuthenticationCallback;
-import edu.mit.printAtMIT.model.touchstone.authn.IMobileAuthenticationHandler;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.AuthenticationResult;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.IAuthenticationCallback;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.IMobileAuthenticationHandler;
 
 
 public class PrintAuthenticationHandler implements IMobileAuthenticationHandler {

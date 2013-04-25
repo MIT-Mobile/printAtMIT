@@ -1,7 +1,7 @@
 /*
  * Class that performs the steps for Touchstone authentication
  */
-package edu.mit.printAtMIT.model.touchstone;
+package edu.mit.printAtMIT.model.touchstoneOld;
 
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -52,15 +52,15 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 import edu.mit.printAtMIT.controller.client.PrinterClientException;
-import edu.mit.printAtMIT.model.touchstone.authn.AuthenticationResult;
-import edu.mit.printAtMIT.model.touchstone.authn.IAuthenticationCallback;
-import edu.mit.printAtMIT.model.touchstone.authn.IMobileAuthenticationHandler;
-import edu.mit.printAtMIT.model.touchstone.internal.ChainedSSLSocketFactory;
-import edu.mit.printAtMIT.model.touchstone.internal.MobileRequest;
-import edu.mit.printAtMIT.model.touchstone.internal.MobileRequestState;
-import edu.mit.printAtMIT.model.touchstone.internal.MobileResponse;
-import edu.mit.printAtMIT.model.touchstone.internal.SerializableCookie;
-import edu.mit.printAtMIT.model.touchstone.internal.TouchstoneResponse;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.AuthenticationResult;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.IAuthenticationCallback;
+import edu.mit.printAtMIT.model.touchstoneOld.authn.IMobileAuthenticationHandler;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.ChainedSSLSocketFactory;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.MobileRequest;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.MobileRequestState;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.MobileResponse;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.SerializableCookie;
+import edu.mit.printAtMIT.model.touchstoneOld.internal.TouchstoneResponse;
 
 public class MobileAPI extends AsyncTask<IMobileAuthenticationHandler, Void, Void> {
 

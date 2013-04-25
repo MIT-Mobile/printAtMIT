@@ -3,12 +3,12 @@ package edu.mit.printAtMIT.model.touchstone.internal;
 import android.net.Uri;
 import android.text.Html;
 import android.util.Log;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import org.htmlcleaner.*;
 
-import edu.mit.printAtMIT.model.touchstone.RequestError;
+import org.htmlcleaner.*;
 
 public class TouchstoneResponse {
 
@@ -20,45 +20,68 @@ public class TouchstoneResponse {
     private static final String[] _touchstoneErrorPaths;
     private static final String kShibbolethAssertActionPath = "//body/form";
     private static final String kShibbolethAssertInputsPath = "//body/form/div/input";
-    private RequestError _error;
-    private Uri _targetUrl;
+    private boolean isSAMLAssertion = false;
+    private boolean isCredentialPrompt = false;
+    private URL _targetUrl;
     private String _userFieldName;
     private String _passwordFieldName;
     private Map<String, String> _samlParameters;
-    private Uri _sourceUrl;
+    private URL _sourceUrl;
     private String _httpBody;
+
+    public class TouchstoneErrorException extends Exception {
+        public final boolean incorrectCredentials;
+
+        public TouchstoneErrorException(Exception cause, boolean incorrectCredentials) {
+            super(cause);
+            this.incorrectCredentials = false;
+        }
+
+        public TouchstoneErrorException(String message, boolean incorrectCredentials) {
+            super(message);
+            this.incorrectCredentials = false;
+        }
+    }
 
     static {
         _cleanerProperties = new CleanerProperties();
         _htmlCleaner = new HtmlCleaner(_cleanerProperties);
 
         _touchstoneLoginActionPaths = new String[]{
-            "//div[@id='loginbox']/form[@id='loginform']",	// Desktop
-            "//div[@id='container']/form[@id='kform']"		// Mobile
+                "//div[@id='loginbox']/form[@id='loginform']",    // Desktop
+                "//div[@id='container']/form[@id='kform']"        // Mobile
         };
 
         _touchstoneUsernamePaths = new String[]{
-            "//div[@id='loginbox']/form[@id='loginform']/fieldset/label/input[@type='text']/@name",	// Desktop
-            "//div[@id='container']/form[@id='kform']//input[@id='username']/@name" // Mobile
+                "//div[@id='loginbox']/form[@id='loginform']/fieldset/label/input[@type='text']/@name",    // Desktop
+                "//div[@id='container']/form[@id='kform']//input[@id='username']/@name" // Mobile
         };
 
         _touchstonePasswordPaths = new String[]{
-            "//div[@id='loginbox']/form[@id='loginform']/fieldset/label/input[@type='text']/@name", // Desktop
-            "//div[@id='container']/form[@id='kform']//input[@id='pwd']/@name" // Mobile
+                "//div[@id='loginbox']/form[@id='loginform']/fieldset/label/input[@type='text']/@name", // Desktop
+                "//div[@id='container']/form[@id='kform']//input[@id='pwd']/@name" // Mobile
         };
-		
-		_touchstoneErrorPaths = new String[]{
-			"//div[@id='loginbox']/div[@class='error']/p", // Desktop
-			"//div[@id='container']/div[@class='alertbox warning']", // Mobile
-		};
+
+        _touchstoneErrorPaths = new String[]{
+                "//div[@id='loginbox']/div[@class='error']/p/text()", // Desktop
+                "//div[@id='container']/div[@class='alertbox warning']/text()", // Mobile
+        };
     }
 
-    public TouchstoneResponse(Uri requestUri, String httpBody) {
+    public TouchstoneResponse(URL requestUri, String httpBody) throws TouchstoneErrorException {
         _sourceUrl = requestUri;
         _httpBody = httpBody;
         _samlParameters = new HashMap<String, String>();
 
         this.processResponse();
+    }
+
+    public boolean isSAMLAssertion() {
+        return isSAMLAssertion;
+    }
+
+    public boolean isCredentialPrompt() {
+        return isCredentialPrompt;
     }
 
     public String getPasswordFieldName() {
@@ -87,122 +110,87 @@ public class TouchstoneResponse {
         return _userFieldName;
     }
 
-    public RequestError getError() {
-        return _error;
-    }
-
-    public boolean isError() {
-        return (_error != null);
-    }
-
-    public boolean isSAMLAssertion() {
-        return ((this.isError() == false)
-                && (_samlParameters != null)
-                && (_targetUrl != null));
-    }
-
-    public boolean isAuthenticationPrompt() {
-        return ((this.isError() == false)
-                && (_userFieldName != null)
-                && (_passwordFieldName != null)
-                && (_targetUrl != null));
-    }
-
-    private void processResponse() {
+    private void processResponse() throws TouchstoneErrorException {
         TagNode docRoot = _htmlCleaner.clean(_httpBody);
 
-        if (this.errorWithNode(docRoot)) {
-            return;
+        if (this.checkForErrorWithNode(docRoot)) {
+            // We should never reach here since checkForErrorWithNode never returns true; it either will
+            // throw an exception or return false
+            throw new TouchstoneErrorException("unknown error processing the response from the Touchstone service", false);
+        } else if (this.authnRequestWithNode(docRoot)) {
+            this.isCredentialPrompt = true;
+            this.isSAMLAssertion = false;
+        } else if (this.samlAttributesWithNode(docRoot)) {
+            this.isCredentialPrompt = false;
+            this.isSAMLAssertion = true;
+        } else {
+            throw new TouchstoneErrorException("invalid response from the Touchstone service", false);
         }
-
-        if (this.authnRequestWithNode(docRoot)) {
-            return;
-        }
-
-        if (this.samlAttributesWithNode(docRoot)) {
-            return;
-        }
-
-        _error = new RequestError("Touchstone response was malformed", RequestError.UNKNOWN_ERROR);
     }
 
-    private boolean errorWithNode(TagNode rootNode) {
-        Object[] nodes = new Object[]{};
-        RequestError error = null;
-
-        for (String path : _touchstoneErrorPaths) {
-            try {
-                nodes = rootNode.evaluateXPath(path);
-            } catch (XPatherException ex) {
-                Log.e(TouchstoneResponse.class.getName(), ex.toString());
-                _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
-                return false;
-            }
-            
-            if (nodes.length > 0)
-            {
-                break;
-            }
-        }
+    // This method is a bit of an oddity. If any error is encountered, it will throw a
+    // TouchstoneErrorException but, in the case of no errors, it will return false.
+    private boolean checkForErrorWithNode(TagNode rootNode) throws TouchstoneErrorException {
+        Object[] nodes = this.evaluatePathsForNode(rootNode, _touchstoneErrorPaths);
 
         if (nodes.length > 0) {
-            TagNode node = (TagNode) (nodes[0]);
-            String nodeText = node.getText().toString().trim();
+            String nodeText = nodes[0].toString().trim();
 
             if (nodeText.toLowerCase().contains("password")) {
-                error = new RequestError("Invalid username or password entered", RequestError.INVALID_CREDENTIALS);
+                throw new TouchstoneErrorException("username or password is incorrect", true);
             } else {
-                error = new RequestError(nodeText, RequestError.TOUCHSTONE_ERROR);
+                throw new TouchstoneErrorException(nodeText, false);
             }
         }
 
-        _error = error;
-        return this.isError();
+        return false;
     }
 
-    private boolean samlAttributesWithNode(TagNode rootNode) {
-        Object[] nodes;
-        RequestError error = null;
-        Uri targetUrl = null;
+    private boolean samlAttributesWithNode(TagNode rootNode) throws TouchstoneErrorException {
+        Uri targetUrl;
+        Object[] nodes = this.evaluatePathsForNode(rootNode, new String[]{kShibbolethAssertActionPath});
 
-        try {
-            nodes = rootNode.evaluateXPath(kShibbolethAssertActionPath);
-        } catch (XPatherException ex) {
-            Log.e(TouchstoneResponse.class.getName(), ex.toString());
-            _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
+        if (nodes.length == 0) {
+            // This page doesn't look like anything remotely like what we were expecting.
+            // Report that we won't handle it (by returning false) to give the class
+            // another chance to parse it as something else. Any further errors should result
+            // in an exception being thrown
             return false;
         }
 
-        if (nodes.length > 0) {
-            TagNode node = (TagNode) (nodes[0]);
-            String action = Html.fromHtml(node.getAttributeByName("action")).toString();
+        TagNode assertNode;
+        Object nodeObject = nodes[0];
+        if (nodeObject instanceof TagNode) {
+            assertNode = (TagNode) nodeObject;
+        } else {
+            throw new TouchstoneErrorException("unexpected node type encountered while processing response", false);
+        }
 
-            if (action.startsWith("/")) {
-                Uri.Builder builder = _sourceUrl.buildUpon();
-                builder.encodedPath(action);
-                targetUrl = builder.build();
-            } else {
-                targetUrl = Uri.parse(action);
-            }
+        String action = Html.fromHtml(assertNode.getAttributeByName("action")).toString();
+
+        if (action.startsWith("/")) {
+            Uri.Builder builder = Uri.parse(_sourceUrl.toString()).buildUpon();
+            builder.encodedPath(action);
+            targetUrl = builder.build();
+        } else {
+            targetUrl = Uri.parse(action);
         }
 
         if (targetUrl == null) {
-            _error = new RequestError("Invalid or missing Touchstone response URI", RequestError.TOUCHSTONE_ERROR);
-            return false;
+            throw new TouchstoneErrorException("invalid Touchstone response", false);
         }
 
-        try {
-            nodes = rootNode.evaluateXPath(kShibbolethAssertInputsPath);
-        } catch (XPatherException ex) {
-            Log.e(TouchstoneResponse.class.getName(), ex.toString());
-            _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
-            return false;
+        // If we get to this point, don't return true/false on error. Any error should result in
+        // a TouchstoneErrorException indicating a malformed response
+        nodes = this.evaluatePathsForNode(rootNode, new String[]{kShibbolethAssertInputsPath});
+        if (nodes.length == 0) {
+            throw new TouchstoneErrorException("invalid Touchstone response", false);
         }
 
         for (Object obj : nodes) {
-            TagNode node = (TagNode) (obj);
-            String name = Html.fromHtml(node.getAttributeByName("name")).toString();
-            String value = node.getAttributeByName("value");
+            TagNode myNode = (TagNode) (obj);
+            String name = Html.fromHtml(myNode.getAttributeByName("name")).toString();
+            String value = myNode.getAttributeByName("value");
 
             // Check to see if the string contains Base64
             // encoded data. If it does, don't mess with it!
@@ -213,105 +201,83 @@ public class TouchstoneResponse {
             _samlParameters.put(name, value);
         }
 
-        _targetUrl = targetUrl;
-        _error = null;
-        return this.isSAMLAssertion();
+        try {
+            _targetUrl = new URL(targetUrl.toString());
+        } catch (MalformedURLException e) {
+            throw new TouchstoneErrorException(e, false);
+        }
+
+        return true;
     }
 
-    private boolean authnRequestWithNode(TagNode rootNode) {
-        Object[] nodes = new Object[]{};
-        Uri targetUrl = null;
-
-        for (String path : _touchstoneLoginActionPaths) {
-            try {
-                nodes = rootNode.evaluateXPath(path);
-            } catch (XPatherException ex) {
-                Log.e(TouchstoneResponse.class.getName(), ex.toString());
-                _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
-                return false;
-            }
-            
-            if (nodes.length > 0)
-            {
-                break;
-            }
-        }
+    private boolean authnRequestWithNode(TagNode rootNode) throws TouchstoneErrorException {
+        Uri targetUrl;
+        Object[] nodes = this.evaluatePathsForNode(rootNode, _touchstoneLoginActionPaths);
 
         if (nodes.length > 0) {
             TagNode node = (TagNode) (nodes[0]);
             String action = node.getAttributeByName("action");
 
             if (action.startsWith("/")) {
-                Uri.Builder builder = _sourceUrl.buildUpon();
+                Uri.Builder builder = Uri.parse(_sourceUrl.toString()).buildUpon();
                 builder.encodedPath(action);
                 targetUrl = builder.build();
             } else {
                 targetUrl = Uri.parse(action);
             }
+        } else {
+            return false;
         }
 
         if (targetUrl == null) {
-            _error = new RequestError("Invalid or missing Touchstone response URI", RequestError.TOUCHSTONE_ERROR);
-            return false;
+            throw new TouchstoneErrorException("invalid Touchstone target uri", false);
         }
+
 
         String userFieldName;
-        nodes = new Object[]{}; // Sanity check!
-        // Grab the name of the username field
-        for (String path : _touchstoneUsernamePaths) {
-            try {
-                nodes = rootNode.evaluateXPath(path);
-            } catch (XPatherException ex) {
-                Log.e(TouchstoneResponse.class.getName(), ex.toString());
-                _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
-                return false;
-            }
-            
-            if (nodes.length > 0)
-            {
-                break;
-            }
-        }
-
+        nodes = this.evaluatePathsForNode(rootNode, _touchstoneUsernamePaths);
         if (nodes.length > 0) {
             userFieldName = (String) (nodes[0]);
         } else {
-            _error = new RequestError("Invalid or missing Touchstone username input", RequestError.TOUCHSTONE_ERROR);
-            return false;
+            throw new TouchstoneErrorException("malformed Touchstone response", false);
         }
 
 
         String passwordFieldName;
-        // Grab the name of the password field
-        nodes = new Object[]{}; // Sanity check!
-        // Grab the name of the username field
-        for (String path : _touchstonePasswordPaths) {
-            try {
-                nodes = rootNode.evaluateXPath(path);
-            } catch (XPatherException ex) {
-                Log.e(TouchstoneResponse.class.getName(), ex.toString());
-                _error = new RequestError(ex.getLocalizedMessage(), RequestError.UNKNOWN_ERROR);
-                return false;
-            }
-            
-            if (nodes.length > 0)
-            {
-                break;
-            }
-        }
-        
+        nodes = this.evaluatePathsForNode(rootNode, _touchstonePasswordPaths);
         if (nodes.length > 0) {
             passwordFieldName = (String) (nodes[0]);
         } else {
-            _error = new RequestError("Invalid or missing Touchstone password input", RequestError.TOUCHSTONE_ERROR);
-            return false;
+            throw new TouchstoneErrorException("malformed Touchstone response", false);
         }
 
 
-        _targetUrl = targetUrl;
+        try {
+            _targetUrl = new URL(targetUrl.toString());
+        } catch (MalformedURLException e) {
+            throw new TouchstoneErrorException(e, false);
+        }
+
         _userFieldName = userFieldName;
         _passwordFieldName = passwordFieldName;
-        _error = null;
-        return this.isAuthenticationPrompt();
+
+        return true;
+    }
+
+    private Object[] evaluatePathsForNode(final TagNode rootNode, String[] paths) {
+        try {
+            Object[] nodes;
+            for (String path : paths) {
+                nodes = rootNode.evaluateXPath(path);
+
+                if ((nodes != null) && (nodes.length > 0)) {
+                    return nodes;
+                }
+            }
+        } catch (XPatherException e) {
+            return null;
+        }
+
+        return new Object[0];
     }
 }
